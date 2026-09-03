@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>G Lab — Edit Account & Profile</title>
+    <link rel="icon" type="image/png" href="animation/Favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="preloader.js"></script>
+    <style>
+        :root {
+            /* PREMIUM WHITE & LIGHT THEME PALETTE */
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --card-hover-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --card-hover-border: #cbd5e1;
+            --accent-gradient: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+            --accent-color: #0284c7;
+            --accent-glow: rgba(2, 132, 199, 0.18);
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --input-bg: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER NAVIGATION */
+        header {
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        .logo-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            background: var(--accent-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: white;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .logo-text h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+        }
+
+        .logo-text span {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: inherit;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: white;
+            box-shadow: 0 4px 14px var(--accent-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px var(--accent-glow);
+            filter: brightness(1.05);
+        }
+
+        .btn-outline {
+            background: #ffffff;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-outline:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+        }
+
+        .btn-danger:hover {
+            background: #fecaca;
+        }
+
+        /* MAIN WRAPPER */
+        .page-container {
+            max-width: 680px;
+            margin: 40px auto;
+            padding: 0 20px;
+            flex: 1;
+            width: 100%;
+        }
+
+        .edit-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 38px;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.025);
+        }
+
+        .edit-card h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .section-box {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 22px;
+            margin-bottom: 22px;
+        }
+
+        .section-box h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px 14px;
+            background: #ffffff;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 0.92rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        #message {
+            margin-bottom: 20px;
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: none;
+        }
+
+        #message.error { display: block; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+        #message.success { display: block; background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+        #message.loading { display: block; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+
+        /* FOOTER STYLING */
+        footer.site-footer {
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
+            padding: 60px 40px 25px 40px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: auto;
+        }
+
+        .footer-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
+            gap: 40px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .footer-brand-desc {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin: 12px 0 18px 0;
+        }
+
+        .footer-dev-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            background: #e0f2fe;
+            padding: 5px 14px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+        }
+
+        .footer-column-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 18px;
+            letter-spacing: -0.2px;
+        }
+
+        .footer-links-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links-list li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links-list a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 500;
+            transition: color 0.2s ease, transform 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .footer-links-list a:hover {
+            color: var(--accent-color);
+            transform: translateX(3px);
+        }
+
+        .footer-bottom-bar {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding-top: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            font-size: 0.86rem;
+            color: var(--text-muted);
+        }
+
+        .footer-copyright strong {
+            color: var(--text-main);
+        }
+
+        .footer-developer-credit {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .footer-developer-credit span {
+            color: var(--accent-color);
+        }
+
+        @media (max-width: 990px) {
+            .footer-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 14px 20px;
+            }
+            .edit-card {
+                padding: 24px 18px;
+            }
+            .footer-container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            .footer-bottom-bar {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER NAVIGATION -->
+    <header>
+        <a href="index.html" class="logo-title">
+            <div class="logo-icon">G</div>
+            <div class="logo-text">
+                <h1>G LAB</h1>
+                <span>ACCOUNT SETTINGS</span>
+            </div>
+        </a>
+        <div class="nav-actions">
+            <a href="profile.html" class="btn btn-outline"><i class="fa-solid fa-user"></i> View Profile</a>
+            <a href="home.html" class="btn btn-outline"><i class="fa-solid fa-house"></i> Store</a>
+        </div>
+    </header>
+
+    <div class="page-container">
+        <div class="edit-card">
+            <h2>Account Settings</h2>
+            <div id="message"></div>
+
+            <!-- 1. PERSONAL INFORMATION (PUT /users/profile) -->
+            <div class="section-box">
+                <h3><i class="fa-solid fa-user-gear" style="color: var(--accent-color);"></i> Personal Profile Information</h3>
+                <form id="profileForm" onsubmit="updateProfileInfo(event)">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="form-group">
+                            <label for="firstname">First Name *</label>
+                            <input type="text" id="firstname" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastname">Last Name *</label>
+                            <input type="text" id="lastname" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Profile Picture</label>
+                        <div style="display: flex; align-items: center; gap: 16px; margin-top: 8px;">
+                            <img id="avatarPreview" src="https://via.placeholder.com/70?text=Avatar" alt="Avatar Preview" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-color); background: #f1f5f9;" onerror="this.src='https://via.placeholder.com/70?text=Avatar'">
+                            <div style="flex: 1;">
+                                <input type="file" id="profileImageInput" accept=".jpg, .jpeg, .png, .webp, image/jpeg, image/png, image/webp" style="padding: 8px;">
+                                <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">Choose a JPG, PNG, or WEBP image (max 5MB) from your device.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Save Personal Details</button>
+                </form>
+            </div>
+
+            <!-- 2. DELIVERY ADDRESS (PUT /users/address) -->
+            <div class="section-box">
+                <h3><i class="fa-solid fa-location-dot" style="color: var(--accent-color);"></i> Delivery Address</h3>
+                <form id="addressForm" onsubmit="updateAddressInfo(event)">
+                    <div class="form-group">
+                        <label for="addressLine">Street Address / Line *</label>
+                        <input type="text" id="addressLine" required placeholder="123 Tech Street, Suite 4">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="form-group">
+                            <label for="city">City *</label>
+                            <input type="text" id="city" required placeholder="Colombo">
+                        </div>
+                        <div class="form-group">
+                            <label for="district">District *</label>
+                            <input type="text" id="district" required placeholder="Colombo">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="postalCode">Postal Code *</label>
+                        <input type="text" id="postalCode" required placeholder="00100">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Save Delivery Address</button>
+                </form>
+            </div>
+
+            <!-- 3. CHANGE PASSWORD (PUT /users/change-password) -->
+            <div class="section-box">
+                <h3><i class="fa-solid fa-lock" style="color: var(--accent-color);"></i> Security & Password</h3>
+                <form id="passwordForm" onsubmit="changeUserPassword(event)">
+                    <div class="form-group">
+                        <label for="currentPassword">Current Password *</label>
+                        <input type="password" id="currentPassword" required placeholder="••••••••">
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">New Password *</label>
+                        <input type="password" id="newPassword" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-outline" style="width: 100%;">Update Password</button>
+                </form>
+            </div>
+
+            <!-- 4. DELETE OWN ACCOUNT (DELETE /users/profile) -->
+            <div class="section-box" style="border-color: #fca5a5; background: #fff5f5;">
+                <h3 style="color: #dc2626;"><i class="fa-solid fa-triangle-exclamation"></i> Danger Zone</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
+                    Permanently delete your account and all associated order data. This action cannot be undone.
+                </p>
+                <button type="button" class="btn btn-danger" style="width: 100%;" onclick="deleteAccount()">Delete My Account</button>
+            </div>
+
+            <div style="display: flex; gap: 12px;">
+                <button type="button" class="btn btn-outline" style="flex: 1;" onclick="window.location.href='profile.html'">← Back to Profile</button>
+                <button type="button" class="btn btn-outline" style="flex: 1;" onclick="window.location.href='cart.html'">🛒 Go to Cart</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <a href="index.html" class="logo-title">
+                    <div class="logo-icon">G</div>
+                    <div class="logo-text">
+                        <h1>G LAB</h1>
+                        <span>COMPUTER HARDWARE</span>
+                    </div>
+                </a>
+                <div class="footer-dev-badge" style="margin-top: 10px;">
+                    <i class="fa-solid fa-code"></i> Developed by Kavindu Geethshan
+                </div>
+                <p class="footer-brand-desc">
+                    Sri Lanka's premier destination for high-performance computer hardware, custom PC components, gaming gear, and official manufacturer warranties.
+                </p>
+            </div>
+
+            <div>
+                <h4 class="footer-column-title">Quick Links</h4>
+                <ul class="footer-links-list">
+                    <li><a href="index.html"><i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i> Home Page</a></li>
+                    <li><a href="products.html"><i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i> All Products</a></li>
+                    <li><a href="index.html#categoriesSection"><i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i> Categories</a></li>
+                    <li><a href="index.html#whyGlab"><i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i> Why Choose G LAB</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="footer-column-title">Customer Care</h4>
+                <ul class="footer-links-list">
+                    <li><a href="profile.html"><i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i> My Account</a></li>
+                    <li><a href="cart.html"><i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i> Shopping Cart</a></li>
+                    <li><a href="cart.html#my-orders"><i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i> Track Orders</a></li>
+                    <li><a href="login.html"><i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i> Sign In / Register</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="footer-column-title">Contact & Support</h4>
+                <ul class="footer-links-list" style="margin-bottom: 16px;">
+                    <li style="display: flex; gap: 8px; color: var(--text-muted);"><i class="fa-solid fa-location-dot" style="color: var(--accent-color); margin-top: 3px;"></i> Colombo, Sri Lanka</li>
+                    <li style="display: flex; gap: 8px; color: var(--text-muted);"><i class="fa-solid fa-envelope" style="color: var(--accent-color); margin-top: 3px;"></i> support@glab.lk</li>
+                    <li style="display: flex; gap: 8px; color: var(--text-muted);"><i class="fa-solid fa-phone" style="color: var(--accent-color); margin-top: 3px;"></i> 0767601045</li>
+                </ul>
+                <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">SECURE CHECKOUT</div>
+                <div style="display: flex; gap: 8px; font-size: 1.3rem; color: var(--text-muted);">
+                    <i class="fa-solid fa-shield-halved" style="color: #10b981;" title="PayHere Encrypted"></i>
+                    <i class="fa-brands fa-cc-visa" title="Visa"></i>
+                    <i class="fa-brands fa-cc-mastercard" title="MasterCard"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom-bar">
+            <div class="footer-copyright">
+                © 2026 <strong>G LAB</strong>. All rights reserved.
+            </div>
+            <div class="footer-developer-credit">
+                Developed by <span>Kavindu Geethshan</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT ENGINE -->
+    <script src="api-config.js"></script>
+    <script type="importmap">
+    {
+      "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+        "firebase/storage": "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js"
+      }
+    }
+    </script>
+    <script type="module">
+        import { storage } from "./firebase.js";
+        import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+
+        const API_URL = window.API_URL;
+
+        const token = localStorage.getItem("token");
+        if (!token) window.location.href = "login.html";
+
+        function getHeaders() {
+            return {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            };
+        }
+
+        function setMessage(text, type) {
+            const el = document.getElementById("message");
+            if (!text) { el.style.display = "none"; return; }
+            el.textContent = text;
+            el.className = type || "";
+            if (type === "success" || type === "error") {
+                setTimeout(() => { if (el.textContent === text) el.style.display = "none"; }, 4000);
+            }
+        }
+
+        // Live preview on file selection
+        document.getElementById("profileImageInput")?.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                if (!file.type.startsWith("image/")) {
+                    setMessage("Please select a valid image file (PNG, JPG, WEBP).", "error");
+                    e.target.value = "";
+                    return;
+                }
+                const previewUrl = URL.createObjectURL(file);
+                document.getElementById("avatarPreview").src = previewUrl;
+            }
+        });
+
+        async function loadCurrentUserData() {
+            try {
+                const res = await fetch(`${API_URL}/users/profile`, { headers: getHeaders() });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || "Failed to load profile");
+
+                const u = data.user || data;
+                document.getElementById("firstname").value = u.firstname || "";
+                document.getElementById("lastname").value = u.lastname || "";
+                document.getElementById("email").value = u.email || "";
+
+                const userImg = u.Image || u.image;
+                if (userImg) {
+                    document.getElementById("avatarPreview").src = userImg;
+                }
+
+                const addr = u.address || {};
+                document.getElementById("addressLine").value = addr.addressLine || "";
+                document.getElementById("city").value = addr.city || "";
+                document.getElementById("district").value = addr.district || "";
+                document.getElementById("postalCode").value = addr.postalCode || "";
+
+            } catch (err) {
+                console.error("loadCurrentUserData error:", err);
+                setMessage(`Failed to load profile data: ${err.message}`, "error");
+            }
+        }
+
+        /**
+         * Security Barrier: Validates image files against spoofing, malicious extensions,
+         * oversized files, and binary signature mismatches (magic numbers).
+         */
+        async function validateImageSecurity(file) {
+            if (!file) {
+                return { valid: false, error: "No file selected." };
+            }
+
+            // 1. File Size Verification (16 Bytes <= Size <= 5MB)
+            const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
+            if (!file.size || file.size < 16) {
+                return { valid: false, error: "Security Warning: The selected file is empty or corrupted." };
+            }
+            if (file.size > MAX_SIZE) {
+                return { valid: false, error: "File size exceeds 5MB limit. Please choose a smaller photo." };
+            }
+
+            // 2. Dangerous File Name and Double Extension Check
+            const fileName = file.name.toLowerCase();
+            const dangerousPatterns = /\.(php|phtml|html|htm|js|exe|bat|cmd|sh|py|pl|vbs|svg|cgi|asp|aspx|dll|jar|scr)(\.|$)/i;
+            if (dangerousPatterns.test(fileName)) {
+                return { valid: false, error: "Security Alert: Prohibited or executable file extension detected. Upload blocked." };
+            }
+
+            // 3. Strict Allowed File Extensions (JPG, JPEG, PNG, WEBP)
+            const ext = fileName.split('.').pop();
+            const allowedExtensions = ["jpg", "jpeg", "png", "webp"];
+            if (!allowedExtensions.includes(ext)) {
+                return { valid: false, error: "Invalid file extension. Only JPG, JPEG, PNG, and WEBP files are allowed." };
+            }
+
+            // 4. Strict Allowed MIME Types
+            const allowedMimes = ["image/jpeg", "image/png", "image/webp"];
+            if (!allowedMimes.includes(file.type.toLowerCase())) {
+                return { valid: false, error: `Invalid file format (${file.type || 'unknown'}). Only JPG, PNG, and WEBP image files are allowed.` };
+            }
+
+            // 5. Deep Binary Header Inspection (Magic Number Verification)
+            try {
+                const headerSlice = await file.slice(0, 16).arrayBuffer();
+                const bytes = new Uint8Array(headerSlice);
+
+                let isRealImage = false;
+
+                // JPEG Magic Number: FF D8 FF
+                if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) {
+                    isRealImage = true;
+                }
+                // PNG Magic Number: 89 50 4E 47 0D 0A 1A 0A
+                else if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) {
+                    isRealImage = true;
+                }
+                // WEBP Magic Number: RIFF (52 49 46 46) ... WEBP (57 45 42 50)
+                else if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
+                         bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) {
+                    isRealImage = true;
+                }
+
+                if (!isRealImage) {
+                    return { valid: false, error: "Security Alert: File signature mismatch! The file is not a genuine image or has a forged extension." };
+                }
+            } catch (readErr) {
+                return { valid: false, error: "Failed to verify file integrity. Upload rejected." };
+            }
+
+            // 6. Anti-Decompression Bomb & Decode Integrity Check
+            return new Promise((resolve) => {
+                const img = new Image();
+                const objectUrl = URL.createObjectURL(file);
+
+                img.onload = () => {
+                    URL.revokeObjectURL(objectUrl);
+                    if (img.naturalWidth > 6000 || img.naturalHeight > 6000) {
+                        resolve({ valid: false, error: "Image dimensions too large (maximum 6000x6000 px allowed)." });
+                    } else if (img.naturalWidth === 0 || img.naturalHeight === 0) {
+                        resolve({ valid: false, error: "Invalid or zero-dimension image file." });
+                    } else {
+                        resolve({ valid: true });
+                    }
+                };
+
+                img.onerror = () => {
+                    URL.revokeObjectURL(objectUrl);
+                    resolve({ valid: false, error: "Corrupted or non-renderable image file. Upload rejected." });
+                };
+
+                img.src = objectUrl;
+            });
+        }
+
+        // Live preview & validation on file selection
+        document.getElementById("profileImageInput")?.addEventListener("change", async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const validation = await validateImageSecurity(file);
+            if (!validation.valid) {
+                setMessage(validation.error, "error");
+                e.target.value = "";
+                return;
+            }
+
+            // Show immediate safe preview
+            const previewUrl = URL.createObjectURL(file);
+            document.getElementById("avatarPreview").src = previewUrl;
+            setMessage("Image verified as safe and ready to upload.", "success");
+        });
+
+        async function updateProfileInfo(e) {
+            e.preventDefault();
+
+            const firstname = document.getElementById("firstname").value.trim();
+            const lastname = document.getElementById("lastname").value.trim();
+            const email = document.getElementById("email").value.trim().toLowerCase();
+
+            if (!firstname || !lastname || !email) {
+                setMessage("Please fill in all required fields.", "error");
+                return;
+            }
+
+            const fileInput = document.getElementById("profileImageInput");
+            const file = fileInput.files[0];
+            let imageUrl = null;
+
+            if (file) {
+                // Pre-upload security validation barrier
+                const validation = await validateImageSecurity(file);
+                if (!validation.valid) {
+                    setMessage(validation.error, "error");
+                    fileInput.value = "";
+                    return;
+                }
+
+                try {
+                    setMessage("Verifying security & uploading profile picture...", "loading");
+                    const timestamp = Date.now();
+                    const randomStr = Math.random().toString(36).substring(2, 9);
+                    const extension = file.name.split('.').pop().toLowerCase() || 'jpg';
+                    const uniqueFileName = `${timestamp}_${randomStr}.${extension}`;
+                    const storageRef = ref(storage, `profiles/${uniqueFileName}`);
+
+                    const snapshot = await uploadBytes(storageRef, file);
+                    imageUrl = await getDownloadURL(snapshot.ref);
+                } catch (uploadErr) {
+                    console.error("Firebase upload error:", uploadErr);
+                    setMessage(`Image upload failed: ${uploadErr.message}`, "error");
+                    return;
+                }
+            }
+
+            const body = { firstname, lastname, email };
+            if (imageUrl) {
+                body.Image = imageUrl;
+            }
+
+            setMessage("Saving personal details...", "loading");
+            try {
+                const res = await fetch(`${API_URL}/users/profile`, {
+                    method: "PUT",
+                    headers: getHeaders(),
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || "Update failed");
+
+                setMessage("Personal profile updated successfully!", "success");
+                const updatedUser = data.user || data;
+                if (updatedUser) {
+                    localStorage.setItem("user", JSON.stringify(updatedUser));
+                    const newPic = updatedUser.Image || updatedUser.image;
+                    if (newPic) {
+                        document.getElementById("avatarPreview").src = newPic;
+                    }
+                }
+                fileInput.value = "";
+
+            } catch (err) {
+                console.error("updateProfile error:", err);
+                setMessage(`Update failed: ${err.message}`, "error");
+            }
+        }
+
+        async function updateAddressInfo(e) {
+            e.preventDefault();
+            const address = {
+                addressLine: document.getElementById("addressLine").value.trim(),
+                city: document.getElementById("city").value.trim(),
+                district: document.getElementById("district").value.trim(),
+                postalCode: document.getElementById("postalCode").value.trim()
+            };
+
+            setMessage("Updating delivery address...", "loading");
+            try {
+                const res = await fetch(`${API_URL}/users/address`, {
+                    method: "PUT",
+                    headers: getHeaders(),
+                    body: JSON.stringify(address)
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || "Address update failed");
+
+                setMessage("Delivery address saved successfully!", "success");
+                if (data.user) localStorage.setItem("user", JSON.stringify(data.user));
+
+            } catch (err) {
+                console.error("updateAddress error:", err);
+                setMessage(`Address update failed: ${err.message}`, "error");
+            }
+        }
+
+        async function changeUserPassword(e) {
+            e.preventDefault();
+            const currentPassword = document.getElementById("currentPassword").value;
+            const newPassword = document.getElementById("newPassword").value;
+
+            if (newPassword.length < 6) {
+                setMessage("New password must be at least 6 characters long.", "error");
+                return;
+            }
+
+            setMessage("Changing password...", "loading");
+            try {
+                const res = await fetch(`${API_URL}/users/change-password`, {
+                    method: "PUT",
+                    headers: getHeaders(),
+                    body: JSON.stringify({ currentPassword, newPassword })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || "Password change failed");
+
+                setMessage("Password changed successfully!", "success");
+                document.getElementById("currentPassword").value = "";
+                document.getElementById("newPassword").value = "";
+
+            } catch (err) {
+                console.error("changePassword error:", err);
+                setMessage(`Password change failed: ${err.message}`, "error");
+            }
+        }
+
+        async function deleteAccount() {
+            if (!confirm("Are you sure you want to PERMANENTLY delete your account?\n\nThis cannot be undone!")) return;
+
+            setMessage("Deleting account...", "loading");
+            try {
+                const res = await fetch(`${API_URL}/users/delete-account`, {
+                    method: "DELETE",
+                    headers: getHeaders()
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || "Account deletion failed");
+
+                alert("Your account has been deleted successfully.");
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                window.location.href = "login.html";
+
+            } catch (err) {
+                console.error("deleteAccount error:", err);
+                setMessage(`Account deletion failed: ${err.message}`, "error");
+            }
+        }
+
+        window.updateProfileInfo = updateProfileInfo;
+        window.updateAddressInfo = updateAddressInfo;
+        window.changeUserPassword = changeUserPassword;
+        window.deleteAccount = deleteAccount;
+
+        window.addEventListener("DOMContentLoaded", loadCurrentUserData);
+    </script>
+</body>
+
+</html>

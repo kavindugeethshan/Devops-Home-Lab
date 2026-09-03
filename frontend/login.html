@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>G Lab — Login & Signup</title>
+    <link rel="icon" type="image/png" href="animation/Favicon.png">
+
+    <!-- Google Font Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="preloader.js"></script>
+
+    <style>
+        * {
+            font-family: "Poppins", sans-serif;
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #fff;
+            overflow-x: hidden;
+        }
+
+        .btn-back-home {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            color: #333;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 8px 16px;
+            border-radius: 30px;
+            border: 1px solid #ccc;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-back-home:hover {
+            background: #5995fd;
+            color: #fff;
+            border-color: #5995fd;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            background: #fff;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .forms-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .signin-signup {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            left: 75%;
+            width: 50%;
+            transition: 1s 0.7s ease-in-out;
+            display: grid;
+            grid-template-columns: 1fr;
+            z-index: 5;
+        }
+
+        form {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 0rem 5rem;
+            transition: all 0.2s 0.7s;
+            overflow: hidden;
+            grid-column: 1/2;
+            grid-row: 1/2;
+        }
+
+        form.sign-in-form {
+            z-index: 2;
+        }
+
+        form.sign-up-form {
+            opacity: 0;
+            z-index: 1;
+        }
+
+        .title {
+            font-size: 2.2rem;
+            color: #444;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .input-field {
+            max-width: 380px;
+            width: 100%;
+            background: #f0f0f0;
+            margin: 8px 0;
+            height: 55px;
+            border-radius: 55px;
+            display: grid;
+            grid-template-columns: 15% 85%;
+            padding: 0 0.4rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .input-field.hidden {
+            display: none !important;
+        }
+
+        .input-field i {
+            text-align: center;
+            line-height: 55px;
+            color: #acacac;
+            transition: 0.5s;
+            font-size: 1.1rem;
+        }
+
+        .input-field input {
+            background: none;
+            outline: none;
+            border: none;
+            line-height: 1;
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: #333;
+        }
+
+        .input-field input::placeholder {
+            color: #aaa;
+            font-weight: 500;
+        }
+
+        .forgot-link {
+            font-size: 0.8rem;
+            color: #5995fd;
+            text-decoration: none;
+            margin-top: 4px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            align-self: flex-end;
+            max-width: 380px;
+            width: 100%;
+            text-align: right;
+        }
+
+        .forgot-link:hover {
+            text-decoration: underline;
+            color: #4d84e2;
+        }
+
+        .btn {
+            width: 150px;
+            background: #5995fd;
+            border: none;
+            outline: none;
+            height: 49px;
+            border-radius: 49px;
+            color: #fff;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: 0.5s;
+        }
+
+        .btn:hover {
+            background: #4d84e2;
+        }
+
+        .message-box {
+            max-width: 380px;
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.82rem;
+            display: none;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .message-box.error {
+            display: block;
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+        }
+
+        .message-box.success {
+            display: block;
+            background: #d1fae5;
+            color: #059669;
+            border: 1px solid #6ee7b7;
+        }
+
+        .message-box.loading {
+            display: block;
+            background: #e0f2fe;
+            color: #0284c7;
+            border: 1px solid #7dd3fc;
+        }
+
+        .panels-container {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            top: 0;
+            left: 0;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .container::before {
+            content: "";
+            position: absolute;
+            height: 2000px;
+            width: 2000px;
+            top: -10px;
+            right: 48%;
+            transform: translateY(-50%);
+            background-image: linear-gradient(-45deg, #4481eb 0%, #04befe 100%);
+            transition: 1.8s ease-in-out;
+            border-radius: 50%;
+            z-index: 6;
+        }
+
+        .image {
+            width: 100%;
+            max-width: 400px;
+            transition: transform 1.1s ease-in-out;
+            transition-delay: 0.4s;
+        }
+
+        .panel {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: space-around;
+            text-align: center;
+            z-index: 6;
+        }
+
+        .left-panel {
+            pointer-events: all;
+            padding: 3rem 17% 2rem 12%;
+        }
+
+        .right-panel {
+            pointer-events: none;
+            padding: 3rem 12% 2rem 17%;
+        }
+
+        .panel .content {
+            color: #fff;
+            transition: transform 0.9s ease-out;
+            transition-delay: 0.6s;
+        }
+
+        .panel h3 {
+            font-weight: 600;
+            line-height: 1;
+            font-size: 1.5rem;
+        }
+
+        .panel p {
+            font-size: 0.95rem;
+            padding: 0.7rem 0;
+        }
+
+        .btn.transparent {
+            margin: 0;
+            background: none;
+            border: 2px solid #fff;
+            width: 130px;
+            height: 41px;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .right-panel .image,
+        .right-panel .content {
+            transform: translateX(800px);
+        }
+
+        /* Animation States */
+        .container.sign-up-mode::before {
+            transform: translate(100%, -50%);
+            right: 52%;
+        }
+
+        .container.sign-up-mode .left-panel .image,
+        .container.sign-up-mode .left-panel .content {
+            transform: translateX(-800px);
+        }
+
+        .container.sign-up-mode .signin-signup {
+            left: 25%;
+        }
+
+        .container.sign-up-mode form.sign-up-form {
+            opacity: 1;
+            z-index: 2;
+        }
+
+        .container.sign-up-mode form.sign-in-form {
+            opacity: 0;
+            z-index: 1;
+        }
+
+        .container.sign-up-mode .right-panel .image,
+        .container.sign-up-mode .right-panel .content {
+            transform: translateX(0%);
+        }
+
+        .container.sign-up-mode .left-panel {
+            pointer-events: none;
+        }
+
+        .container.sign-up-mode .right-panel {
+            pointer-events: all;
+        }
+
+        /* Additional CSS for OTP & Password Requirements & Mobile Usability */
+        .otp-verification-container {
+            display: none;
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            margin: 0 auto;
+            padding: 10px 0;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .otp-video-box {
+            width: 150px;
+            height: 100px;
+            margin: 0 auto 8px auto;
+        }
+
+        .otp-input-field {
+            margin-bottom: 12px;
+            border: 2px solid #5995fd;
+            box-shadow: 0 0 12px rgba(89, 149, 253, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .otp-input-field:focus-within {
+            border-color: #2563eb;
+            box-shadow: 0 0 16px rgba(37, 99, 235, 0.35);
+        }
+
+        .otp-actions-container {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .otp-actions-container #btnVerifyOtp {
+            flex: 1;
+            margin: 0;
+            min-width: 120px;
+        }
+
+        .otp-actions-container #btnResendOtp {
+            padding: 0 16px;
+            font-size: 0.82rem;
+            height: 49px;
+            border-radius: 49px;
+            border: 1.5px solid #2563eb;
+            color: #2563eb;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            margin: 0;
+        }
+
+        .req-badges-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 6px 4px;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 870px) {
+            .container {
+                min-height: 100vh;
+                height: auto;
+                overflow-y: auto;
+                overflow-x: hidden;
+                padding-bottom: 2rem;
+            }
+
+            .container::before {
+                width: 1200px;
+                height: 1200px;
+                transform: translateX(-50%);
+                left: 50%;
+                bottom: 82%;
+                top: initial;
+                right: initial;
+                z-index: 1;
+                transition: 1s ease-in-out;
+            }
+
+            .container.sign-up-mode::before {
+                transform: translateX(-50%);
+                bottom: 82%;
+                left: 50%;
+                right: initial;
+            }
+
+            .forms-container {
+                position: relative;
+                height: auto;
+                min-height: 100vh;
+                z-index: 10;
+            }
+
+            .signin-signup {
+                width: 100%;
+                top: 0 !important;
+                left: 0 !important;
+                transform: none !important;
+                position: relative;
+                z-index: 10;
+                padding: 110px 0 30px 0;
+            }
+
+            .container.sign-up-mode .signin-signup {
+                top: 0 !important;
+                left: 0 !important;
+                transform: none !important;
+            }
+
+            .panels-container {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 120px;
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr;
+                z-index: 100 !important;
+                pointer-events: auto !important;
+            }
+
+            .panel {
+                grid-column: 1/2;
+                grid-row: 1/2;
+                padding: 42px 15px 10px 15px;
+                align-items: center;
+                justify-content: center;
+                flex-direction: row;
+            }
+
+            .left-panel {
+                display: flex !important;
+                z-index: 105 !important;
+                pointer-events: auto !important;
+            }
+
+            .right-panel {
+                display: none !important;
+                z-index: 1 !important;
+                pointer-events: none !important;
+            }
+
+            .container.sign-up-mode .left-panel {
+                display: none !important;
+                z-index: 1 !important;
+                pointer-events: none !important;
+            }
+
+            .container.sign-up-mode .right-panel {
+                display: flex !important;
+                z-index: 105 !important;
+                pointer-events: auto !important;
+            }
+
+            .panel .content {
+                padding: 0;
+                text-align: center;
+                pointer-events: auto !important;
+            }
+
+            .panel button, #sign-up-btn, #sign-in-btn {
+                pointer-events: auto !important;
+                z-index: 106 !important;
+                position: relative;
+                cursor: pointer !important;
+            }
+
+            .panel h3 {
+                font-size: 1.1rem;
+                color: #ffffff;
+                margin-bottom: 4px;
+            }
+
+            .panel p {
+                display: none;
+            }
+
+            .image {
+                display: none;
+            }
+
+            .right-panel .content {
+                transform: translateY(-200px);
+            }
+
+            .container.sign-up-mode .left-panel .content {
+                transform: translateY(-200px);
+            }
+
+            .container.sign-up-mode .right-panel .content {
+                transform: translateY(0px);
+            }
+        }
+
+        @media (max-width: 570px) {
+            form {
+                padding: 0 1rem;
+            }
+
+            .btn-back-home {
+                top: 12px;
+                left: 12px;
+                font-size: 0.78rem;
+                padding: 6px 12px;
+            }
+
+            .image {
+                display: none;
+            }
+
+            .panel .content {
+                padding: 0.5rem 1rem;
+            }
+
+            .container::before {
+                bottom: 72%;
+                left: 50%;
+            }
+
+            .container.sign-up-mode::before {
+                bottom: 28%;
+                left: 50%;
+            }
+
+            #wrongPasswordContainer > div,
+            #successLoginContainer > div {
+                flex-direction: column !important;
+                text-align: center !important;
+                gap: 8px !important;
+            }
+
+            #wrongPasswordVideo, #correctPasswordVideo {
+                width: 110px !important;
+                height: 85px !important;
+            }
+        }
+
+        @media (max-width: 400px) {
+            form {
+                padding: 0 0.6rem;
+            }
+
+            .title {
+                font-size: 1.8rem;
+            }
+
+            .subtitle {
+                font-size: 0.8rem;
+            }
+
+            .input-field {
+                height: 50px;
+                border-radius: 50px;
+            }
+
+            .input-field i {
+                line-height: 50px;
+                font-size: 1rem;
+            }
+
+            .input-field input {
+                font-size: 0.95rem;
+            }
+
+            .otp-actions-container {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .otp-actions-container #btnVerifyOtp,
+            .otp-actions-container #btnResendOtp {
+                width: 100% !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <a href="index.html" class="btn-back-home">
+        <i class="fa-solid fa-arrow-left"></i> Home
+    </a>
+
+    <div class="container" id="mainContainer">
+        <!-- Forms Container -->
+        <div class="forms-container">
+            <div class="signin-signup">
+
+                <!-- 1. Sign In Form -->
+                <form id="signInForm" class="sign-in-form" onsubmit="handleSignInSubmit(event)">
+                    <h2 class="title" id="titleSignIn">Sign in</h2>
+                    <p class="subtitle" id="subHeadingSignIn">Enter your G Lab account credentials</p>
+
+                    <!-- Email Field -->
+                    <div class="input-field" id="fgEmailIn">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" id="email" placeholder="Email Address">
+                    </div>
+
+                    <!-- Real-time Reset Password Requirements Indicator (Shown during Reset Mode) -->
+                    <div id="resetPasswordRequirements" style="display: none; width: 100%; max-width: 380px; margin: 4px 0 8px 0; padding: 2px 4px; transition: all 0.3s ease;">
+                        <div class="req-badges-wrapper">
+                            <span id="reset-req-length" style="display: inline-flex; align-items: center; gap: 3px; font-size: 0.74rem; font-weight: 700; padding: 3px 7px; border-radius: 12px; transition: all 0.25s ease; background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5;">
+                                <span class="req-icon">🔴</span> 8+
+                            </span>
+                            <span id="reset-req-upper" style="display: inline-flex; align-items: center; gap: 3px; font-size: 0.74rem; font-weight: 700; padding: 3px 7px; border-radius: 12px; transition: all 0.25s ease; background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5;">
+                                <span class="req-icon">🔴</span> A-Z
+                            </span>
+                            <span id="reset-req-lower" style="display: inline-flex; align-items: center; gap: 3px; font-size: 0.74rem; font-weight: 700; padding: 3px 7px; border-radius: 12px; transition: all 0.25s ease; background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5;">
+                                <span class="req-icon">🔴</span> a-z
+                            </span>
+                            <span id="reset-req-number" style="display: inline-flex; align-items: center; gap: 3px; font-size: 0.74rem; font-weight: 700; padding: 3px 7px; border-radius: 12px; transition: all 0.25s ease; background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5;">
+                                <span class="req-icon">🔴</span> 0-9
+                            </span>
+                            <span id="reset-req-special" style="display: inline-flex; align-items: center; gap: 3px; font-size: 0.74rem; font-weight: 700; padding: 3px 7px; border-radius: 12px; transition: all 0.25s ease; background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5;">
+                                <span class="req-icon">🔴</span> !@#
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="input-field" id="fgPasswordIn">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="password" placeholder="Password">
+                    </div>
+
+                    <!-- Forgot Password Link -->
+                    <div id="linkForgotWrapper" style="width: 100%; max-width: 380px; text-align: right; margin: 2px 0 8px 0;">
+                        <a id="linkForgot" class="forgot-link" onclick="toggleForgotMode(true)" style="font-size: 0.84rem; color: #0284c7; cursor: pointer; font-weight: 600; text-decoration: underline;">
+                            Forgot Password?
+                        </a>
+                    </div>
+
+                    <!-- Inline Alert Box for Login Feedback (Unregistered user / Wrong password / Blocked) -->
+                    <div id="wrongPasswordContainer" style="display: none; width: 100%; max-width: 440px; margin: 12px 0; transition: all 0.3s ease;">
+                        <div style="display: flex; align-items: center; gap: 14px;">
+                            <!-- Animation Video Outside the Card on the Left -->
+                            <video id="wrongPasswordVideo" autoplay loop muted playsinline style="width: 180px; height: 140px; object-fit: contain; flex-shrink: 0;">
+                                <source id="wrongPasswordVideoSource" src="animation/forgot password red.webm" type="video/webm">
+                            </video>
+
+                            <!-- Card containing Text & Action Link -->
+                            <div id="wrongPasswordCard" style="flex: 1; background: #fff5f5; border: 1px solid #fca5a5; border-radius: 16px; padding: 14px 18px; box-shadow: 0 6px 20px rgba(239, 68, 68, 0.12); text-align: left;">
+                                <div id="wrongPasswordText" style="font-size: 0.92rem; font-weight: 700; color: #dc2626; line-height: 1.3;">
+                                    Invalid email or password
+                                </div>
+                                <a id="wrongPasswordLink" class="forgot-link" onclick="toggleForgotMode(true)" style="font-size: 0.82rem; color: #0284c7; text-decoration: underline; cursor: pointer; font-weight: 600; display: inline-block; margin-top: 6px;">
+                                    Forgot Password?
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Inline Success Login Animation & Card Box -->
+                    <div id="successLoginContainer" style="display: none; width: 100%; max-width: 440px; margin: 12px 0; transition: all 0.3s ease;">
+                        <div style="display: flex; align-items: center; gap: 14px;">
+                            <!-- Success Video Animation Outside Card on Left -->
+                            <video id="correctPasswordVideo" autoplay loop muted playsinline style="width: 180px; height: 140px; object-fit: contain; flex-shrink: 0;">
+                                <source src="animation/correct password.webm" type="video/webm">
+                            </video>
+
+                            <!-- Green Card containing Success Message -->
+                            <div style="flex: 1; background: #f0fdf4; border: 1px solid #86efac; border-radius: 16px; padding: 14px 18px; box-shadow: 0 6px 20px rgba(34, 197, 94, 0.12); text-align: left;">
+                                <div style="font-size: 0.95rem; font-weight: 700; color: #15803d; line-height: 1.3;">
+                                    Login Successful!
+                                </div>
+                                <div style="font-size: 0.82rem; color: #166534; font-weight: 600; margin-top: 4px;">
+                                    Redirecting to your account...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reset Token Field (Hidden by default) -->
+                    <div class="input-field hidden" id="fgResetTokenIn">
+                        <i class="fa-solid fa-key"></i>
+                        <input type="text" id="resetToken" placeholder="Password Reset Token">
+                    </div>
+
+                    <input type="submit" id="btnSubmitIn" value="Login" class="btn solid">
+
+                    <div id="rowBackToLogin" style="display: none; text-align: center; margin-top: 4px;">
+                        <a class="forgot-link" style="text-align: center;" onclick="toggleForgotMode(false)">
+                            <i class="fa-solid fa-arrow-left"></i> Back to Sign In
+                        </a>
+                    </div>
+
+                    <div id="messageIn" class="message-box"></div>
+
+                    <div id="rowSignUpSwitch" style="margin-top: 14px; text-align: center;">
+                        <span style="font-size: 0.85rem; color: #64748b;">Don't have an account? </span>
+                        <a onclick="document.querySelector('#mainContainer').classList.add('sign-up-mode')" style="font-size: 0.85rem; color: #2563eb; font-weight: 700; cursor: pointer; text-decoration: underline;">Sign up</a>
+                    </div>
+
+                    <!-- Inline Resend / Verify Animation Box -->
+                    <div id="resetAnimContainer" style="display: none; width: 100%; max-width: 380px; margin: 10px auto; text-align: center; transition: all 0.3s ease;">
+                        <div style="width: 160px; height: 110px; margin: 0 auto;">
+                            <video id="resetAnimVideo" autoplay loop muted playsinline preload="auto" style="width: 100%; height: 100%; object-fit: contain;">
+                                <source id="resetAnimVideoSource" src="animation/resend.webm" type="video/webm">
+                            </video>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- 2. Sign Up Form -->
+                <form id="signUpForm" class="sign-up-form" onsubmit="handleSignUpSubmit(event)">
+                    <h2 class="title">Sign up</h2>
+                    <p class="subtitle">Create your new G Lab account</p>
+
+                    <div class="input-field">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="firstname" required placeholder="First Name">
+                    </div>
+
+                    <div class="input-field">
+                        <i class="fa-solid fa-user-tag"></i>
+                        <input type="text" id="lastname" required placeholder="Last Name">
+                    </div>
+
+                    <div class="input-field">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" id="emailReg" required placeholder="Email Address">
+                    </div>
+
+                    <!-- Real-time Password Requirements Indicator (Directly above password input) -->
+                    <div id="passwordRequirements" style="display: none; width: 100%; max-width: 380px; margin: 4px 0 8px 0; padding: 2px 4px; transition: all 0.3s ease;">
+                        <div class="req-badges-wrapper">
+                            <span id="req-length" style="display: inline-flex; align-items: center; gap: 3px; font-size: 0.74rem; font-weight: 700; padding: 3px 7px; border-radius: 12px; transition: all 0.25s ease; background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5;">
+                                <span class="req-icon">🔴</span> 8+
+                            </span>
+                            <span id="req-upper" style="display: inline-flex; align-items: center; gap: 3px; font-size: 0.74rem; font-weight: 700; padding: 3px 7px; border-radius: 12px; transition: all 0.25s ease; background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5;">
+                                <span class="req-icon">🔴</span> A-Z
+                            </span>
+                            <span id="req-lower" style="display: inline-flex; align-items: center; gap: 3px; font-size: 0.74rem; font-weight: 700; padding: 3px 7px; border-radius: 12px; transition: all 0.25s ease; background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5;">
+                                <span class="req-icon">🔴</span> a-z
+                            </span>
+                            <span id="req-number" style="display: inline-flex; align-items: center; gap: 3px; font-size: 0.74rem; font-weight: 700; padding: 3px 7px; border-radius: 12px; transition: all 0.25s ease; background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5;">
+                                <span class="req-icon">🔴</span> 0-9
+                            </span>
+                            <span id="req-special" style="display: inline-flex; align-items: center; gap: 3px; font-size: 0.74rem; font-weight: 700; padding: 3px 7px; border-radius: 12px; transition: all 0.25s ease; background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5;">
+                                <span class="req-icon">🔴</span> !@#
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="input-field">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="passwordReg" required placeholder="Password">
+                    </div>
+
+                    <div class="input-field">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <input type="password" id="confirmPassword" required placeholder="Confirm Password">
+                    </div>
+
+                    <input type="submit" id="btnSubmitUp" value="Sign up" class="btn solid">
+
+                    <div id="messageUp" class="message-box"></div>
+
+                    <div id="rowSignInSwitch" style="margin-top: 14px; text-align: center;">
+                        <span style="font-size: 0.85rem; color: #64748b;">Already have an account? </span>
+                        <a onclick="document.querySelector('#mainContainer').classList.remove('sign-up-mode')" style="font-size: 0.85rem; color: #2563eb; font-weight: 700; cursor: pointer; text-decoration: underline;">Sign in</a>
+                    </div>
+                </form>
+
+                <!-- 3. Email OTP Verification View (Shown after Sign Up) -->
+                <div id="otpVerificationView" class="otp-verification-container">
+                    <div class="otp-video-box">
+                        <video id="authOtpVideo" autoplay loop muted playsinline preload="auto" style="width: 100%; height: 100%; object-fit: contain;">
+                            <source id="authOtpVideoSource" src="animation/auth.webm" type="video/webm">
+                        </video>
+                    </div>
+                    <h2 class="title" style="font-size: 1.6rem; margin-bottom: 4px;">Verify Email</h2>
+                    <p id="otpSubtitle" class="subtitle" style="font-size: 0.85rem; color: #64748b; line-height: 1.4; margin-bottom: 18px;">
+                        We sent a 6-digit verification code to your email.
+                    </p>
+
+                    <form id="otpForm" onsubmit="handleVerifyOtp(event)">
+                        <div class="input-field otp-input-field">
+                            <i class="fa-solid fa-key"></i>
+                            <input type="text" id="otpInput" required maxlength="6" inputmode="numeric" pattern="[0-9]{6}" placeholder="Enter 6-digit OTP" style="letter-spacing: 4px; font-weight: 700; font-size: 1.1rem; text-align: center;" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                        </div>
+
+                        <div class="otp-actions-container">
+                            <button type="submit" id="btnVerifyOtp" class="btn solid">Verify Email</button>
+                            <button type="button" id="btnResendOtp" class="btn transparent" onclick="handleResendOtp(event)">Resend Code</button>
+                        </div>
+                    </form>
+
+                    <div id="messageOtp" class="message-box"></div>
+
+                    <div style="margin-top: 12px;">
+                        <a class="forgot-link" style="font-size: 0.82rem; color: #64748b; cursor: pointer; text-align: center; display: inline-block;" onclick="cancelOtpVerification()">
+                            <i class="fa-solid fa-arrow-left"></i> Back to Registration
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Panels Container -->
+        <div class="panels-container">
+            <!-- Left Panel (Login view) -->
+            <div class="panel left-panel">
+                <div class="content">
+                    <h3>New here ?</h3>
+                    <p>Create an account to explore high-performance PC hardware, custom gaming rigs, and exclusive
+                        deals.</p>
+                    <button type="button" class="btn transparent" id="sign-up-btn" onclick="document.querySelector('#mainContainer').classList.add('sign-up-mode');">Sign up</button>
+                </div>
+                <video autoplay loop muted playsinline class="image"
+                    style="border-radius: 16px; object-fit: cover; max-height: 280px;"
+                    onerror="this.style.display='none'">
+                    <source src="animation/Login.mp4" type="video/mp4">
+                </video>
+            </div>
+
+            <!-- Right Panel (Sign up view) -->
+            <div class="panel right-panel">
+                <div class="content">
+                    <h3>One of us ?</h3>
+                    <p>Sign in with your credentials to access your cart, track orders, and manage your hardware
+                        profile.</p>
+                    <button type="button" class="btn transparent" id="sign-in-btn" onclick="document.querySelector('#mainContainer').classList.remove('sign-up-mode');">Sign in</button>
+                </div>
+                <video autoplay loop muted playsinline class="image"
+                    style="border-radius: 16px; object-fit: cover; max-height: 280px;"
+                    onerror="this.style.display='none'">
+                    <source src="animation/sign up.mp4" type="video/mp4">
+                </video>
+            </div>
+        </div>
+    </div>
+
+    <!-- G-Lab API Configuration -->
+    <script src="api-config.js"></script>
+    <script>
+        const API_URL = window.API_URL;
+
+        const container = document.querySelector("#mainContainer");
+        const sign_in_btn = document.querySelector("#sign-in-btn");
+        const sign_up_btn = document.querySelector("#sign-up-btn");
+
+        sign_up_btn.addEventListener("click", () => {
+            container.classList.add("sign-up-mode");
+            setMessageIn("", "");
+            setMessageUp("", "");
+        });
+
+        sign_in_btn.addEventListener("click", () => {
+            container.classList.remove("sign-up-mode");
+            toggleForgotMode(false);
+            setMessageIn("", "");
+            setMessageUp("", "");
+        });
+
+        let isForgotMode = false;
+        let isOtpVerifyMode = false;
+        let isResetMode = false;
+        let pendingVerificationEmail = "";
+        let pendingResetEmail = "";
+        let pendingResetOtp = "";
+        let isSubmittingLogin = false;
+
+        function setMessageIn(text, type) {
+            const el = document.getElementById("messageIn");
+            if (!text) { el.style.display = "none"; return; }
+            el.innerHTML = text;
+            el.style.display = "block";
+            el.className = "message-box " + (type || "");
+        }
+
+        function setMessageUp(text, type) {
+            const el = document.getElementById("messageUp");
+            if (!text) { el.style.display = "none"; return; }
+            el.textContent = text;
+            el.className = "message-box " + (type || "");
+        }
+
+        function setMessageOtp(text, type) {
+            const el = document.getElementById("messageOtp");
+            if (!text) { el.style.display = "none"; return; }
+            el.textContent = text;
+            el.className = "message-box " + (type || "");
+        }
+
+        function showOtpVerificationView() {
+            document.getElementById("signUpForm").style.display = "none";
+            const otpView = document.getElementById("otpVerificationView");
+            otpView.style.display = "block";
+            
+            const video = document.getElementById("authOtpVideo");
+            const source = document.getElementById("authOtpVideoSource");
+            if (video && source) {
+                source.src = "animation/auth.webm";
+                video.load();
+                video.currentTime = 0;
+                video.play().catch(() => {});
+            }
+
+            const subtitle = document.getElementById("otpSubtitle");
+            if (subtitle) {
+                subtitle.textContent = `We sent a 6-digit verification code to ${pendingVerificationEmail || 'your email'}.`;
+            }
+            
+            const otpInput = document.getElementById("otpInput");
+            if (otpInput) {
+                otpInput.value = "";
+                otpInput.focus();
+            }
+            setMessageOtp("", "");
+        }
+
+        function cancelOtpVerification() {
+            document.getElementById("otpVerificationView").style.display = "none";
+            document.getElementById("signUpForm").style.display = "flex";
+            setMessageUp("", "");
+        }
+
+        function switchToSignUpWithEmail(email) {
+            hideWrongPasswordAlert();
+            const container = document.querySelector('#mainContainer');
+            if (container) container.classList.add('sign-up-mode');
+            const emailReg = document.getElementById('emailReg');
+            if (emailReg && email) {
+                emailReg.value = email;
+                emailReg.focus();
+            }
+        }
+
+        function showLoginAlert(errorType, errMsg, email) {
+            const container = document.getElementById("wrongPasswordContainer");
+            const video = document.getElementById("wrongPasswordVideo");
+            const videoSource = document.getElementById("wrongPasswordVideoSource");
+            const textEl = document.getElementById("wrongPasswordText");
+            const linkEl = document.getElementById("wrongPasswordLink");
+            const cardEl = document.getElementById("wrongPasswordCard");
+
+            if (!container) return;
+
+            if (errorType === "USER_NOT_FOUND") {
+                if (textEl) {
+                    textEl.textContent = errMsg || "This email is not registered. Please register.";
+                    textEl.style.color = "#dc2626";
+                }
+                if (cardEl) {
+                    cardEl.style.background = "#fff5f5";
+                    cardEl.style.borderColor = "#fca5a5";
+                    cardEl.style.boxShadow = "0 6px 20px rgba(239, 68, 68, 0.12)";
+                }
+                if (video && videoSource) {
+                    videoSource.src = "animation/auth-failed.webm";
+                    video.load();
+                    video.currentTime = 0;
+                    video.play().catch(() => {});
+                }
+                if (linkEl) {
+                    linkEl.style.display = "inline-block";
+                    linkEl.textContent = "Click here to Register";
+                    linkEl.style.color = "#2563eb";
+                    linkEl.onclick = () => switchToSignUpWithEmail(email);
+                }
+            } else if (errorType === "ACCOUNT_BLOCKED") {
+                if (textEl) {
+                    textEl.textContent = errMsg || "Your account has been blocked. Please contact support.";
+                    textEl.style.color = "#dc2626";
+                }
+                if (cardEl) {
+                    cardEl.style.background = "#fff5f5";
+                    cardEl.style.borderColor = "#fca5a5";
+                    cardEl.style.boxShadow = "0 6px 20px rgba(239, 68, 68, 0.12)";
+                }
+                if (video && videoSource) {
+                    videoSource.src = "animation/auth-failed.webm";
+                    video.load();
+                    video.currentTime = 0;
+                    video.play().catch(() => {});
+                }
+                if (linkEl) {
+                    linkEl.style.display = "none";
+                }
+            } else {
+                // WRONG_PASSWORD
+                if (textEl) {
+                    textEl.textContent = errMsg || "Incorrect password. Please try again.";
+                    textEl.style.color = "#dc2626";
+                }
+                if (cardEl) {
+                    cardEl.style.background = "#fff5f5";
+                    cardEl.style.borderColor = "#fca5a5";
+                    cardEl.style.boxShadow = "0 6px 20px rgba(239, 68, 68, 0.12)";
+                }
+                if (video && videoSource) {
+                    videoSource.src = "animation/forgot password red.webm";
+                    video.load();
+                    video.currentTime = 0;
+                    video.play().catch(() => {});
+                }
+                if (linkEl) {
+                    linkEl.style.display = "inline-block";
+                    linkEl.textContent = "Forgot Password?";
+                    linkEl.style.color = "#0284c7";
+                    linkEl.onclick = () => toggleForgotMode(true);
+                }
+            }
+
+            container.style.display = "block";
+        }
+
+        function showWrongPasswordAlert(errMsg) {
+            showLoginAlert("WRONG_PASSWORD", errMsg);
+        }
+
+        function hideWrongPasswordAlert() {
+            const wrongContainer = document.getElementById("wrongPasswordContainer");
+            if (wrongContainer) wrongContainer.style.display = "none";
+            const successContainer = document.getElementById("successLoginContainer");
+            if (successContainer) successContainer.style.display = "none";
+            setMessageIn("", "");
+        }
+
+        function toggleForgotMode(enable) {
+            isForgotMode = enable;
+            isOtpVerifyMode = false;
+            isResetMode = false;
+            hideWrongPasswordAlert();
+
+            const fgEmailIn = document.getElementById("fgEmailIn");
+            const fgPasswordIn = document.getElementById("fgPasswordIn");
+            const fgResetTokenIn = document.getElementById("fgResetTokenIn");
+            const rowBackToLogin = document.getElementById("rowBackToLogin");
+            const subHeadingIn = document.getElementById("subHeadingSignIn");
+            const btnSubmitIn = document.getElementById("btnSubmitIn");
+            const linkForgot = document.getElementById("linkForgot");
+            const titleSignIn = document.getElementById("titleSignIn");
+
+            if (btnSubmitIn) btnSubmitIn.disabled = false;
+
+            if (enable) {
+                titleSignIn.textContent = "Forgot Password";
+                subHeadingIn.textContent = "Enter your registered email address";
+                fgEmailIn.classList.remove("hidden");
+                fgPasswordIn.classList.add("hidden");
+                fgResetTokenIn.classList.add("hidden");
+                btnSubmitIn.value = "Send Reset Code";
+                if (linkForgot) linkForgot.style.display = "none";
+                rowBackToLogin.style.display = "block";
+            } else {
+                titleSignIn.textContent = "Sign in";
+                subHeadingIn.textContent = "Enter your G Lab account credentials";
+                fgEmailIn.classList.remove("hidden");
+                fgPasswordIn.classList.remove("hidden");
+                fgResetTokenIn.classList.add("hidden");
+                btnSubmitIn.value = "Login";
+                if (linkForgot) linkForgot.style.display = "block";
+                rowBackToLogin.style.display = "none";
+                const resetAnimContainer = document.getElementById("resetAnimContainer");
+                if (resetAnimContainer) resetAnimContainer.style.display = "none";
+                pendingResetEmail = "";
+                pendingResetOtp = "";
+            }
+        }
+
+        function setOtpVerifyMode() {
+            isForgotMode = false;
+            isOtpVerifyMode = true;
+            isResetMode = false;
+
+            const fgEmailIn = document.getElementById("fgEmailIn");
+            const fgPasswordIn = document.getElementById("fgPasswordIn");
+            const fgResetTokenIn = document.getElementById("fgResetTokenIn");
+            const subHeadingIn = document.getElementById("subHeadingSignIn");
+            const btnSubmitIn = document.getElementById("btnSubmitIn");
+            const titleSignIn = document.getElementById("titleSignIn");
+            const resetTokenInput = document.getElementById("resetToken");
+
+            titleSignIn.textContent = "Verify Reset Code";
+            subHeadingIn.textContent = `Enter the 6-digit OTP code sent to ${pendingResetEmail}`;
+            fgEmailIn.classList.add("hidden");
+            fgPasswordIn.classList.add("hidden");
+            fgResetTokenIn.classList.remove("hidden");
+
+            const animContainer = document.getElementById("resetAnimContainer");
+            const animVideo = document.getElementById("resetAnimVideo");
+            const animSource = document.getElementById("resetAnimVideoSource");
+            if (animContainer) animContainer.style.display = "block";
+            if (animVideo && animSource) {
+                animSource.src = "animation/resend.webm";
+                animVideo.load();
+                animVideo.currentTime = 0;
+                animVideo.play().catch(() => {});
+            }
+
+            if (resetTokenInput) {
+                resetTokenInput.placeholder = "Enter 6-Digit OTP";
+                resetTokenInput.value = "";
+                resetTokenInput.focus();
+            }
+            btnSubmitIn.value = "Verify Code";
+        }
+
+        function setNewPasswordMode() {
+            isForgotMode = false;
+            isOtpVerifyMode = false;
+            isResetMode = true;
+
+            const fgEmailIn = document.getElementById("fgEmailIn");
+            const fgPasswordIn = document.getElementById("fgPasswordIn");
+            const fgResetTokenIn = document.getElementById("fgResetTokenIn");
+            const subHeadingIn = document.getElementById("subHeadingSignIn");
+            const btnSubmitIn = document.getElementById("btnSubmitIn");
+            const titleSignIn = document.getElementById("titleSignIn");
+            const passwordInput = document.getElementById("password");
+            const reqContainer = document.getElementById("resetPasswordRequirements");
+
+            titleSignIn.textContent = "Set New Password";
+            subHeadingIn.textContent = "Enter your new account password";
+            fgEmailIn.classList.add("hidden");
+            fgPasswordIn.classList.remove("hidden");
+            fgResetTokenIn.classList.add("hidden");
+            const resetAnimContainer = document.getElementById("resetAnimContainer");
+            if (resetAnimContainer) resetAnimContainer.style.display = "none";
+            if (reqContainer) reqContainer.style.display = "block";
+            if (passwordInput) {
+                passwordInput.value = "";
+                passwordInput.focus();
+                validatePasswordRequirements("", "reset-req-", "resetPasswordRequirements");
+            }
+            btnSubmitIn.value = "Update Password";
+        }
+
+        // 1. SIGN IN / FORGOT / RESET SUBMIT HANDLER
+        async function handleSignInSubmit(event) {
+            event.preventDefault();
+            setMessageIn("", "");
+
+            const email = document.getElementById("email").value.trim().toLowerCase();
+            const password = document.getElementById("password").value;
+            const resetToken = document.getElementById("resetToken").value.trim();
+
+            // A. FORGOT PASSWORD MODE - Step 1: Send Reset OTP (POST /users/forgot-password)
+            if (isForgotMode) {
+                if (!email) {
+                    setMessageIn("Please enter your registered email address.", "error");
+                    return;
+                }
+
+                const btnSubmitIn = document.getElementById("btnSubmitIn");
+                btnSubmitIn.disabled = true;
+                btnSubmitIn.value = "Sending Code...";
+
+                const animContainer = document.getElementById("resetAnimContainer");
+                const animVideo = document.getElementById("resetAnimVideo");
+                if (animContainer) animContainer.style.display = "block";
+                if (animVideo) {
+                    animVideo.currentTime = 0;
+                    animVideo.play().catch(() => {});
+                }
+
+                setMessageIn("Sending password reset code...", "loading");
+                try {
+                    const res = await fetch(`${API_URL}/users/forgot-password`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email })
+                    });
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        const err = new Error(data.message || "Failed to send reset code");
+                        err.errorType = data.errorType || (res.status === 404 ? "USER_NOT_FOUND" : "GENERAL");
+                        err.status = res.status;
+                        throw err;
+                    }
+
+                    pendingResetEmail = email;
+                    setMessageIn("Password reset code sent to your email!", "success");
+                    setTimeout(() => {
+                        btnSubmitIn.disabled = false;
+                        setOtpVerifyMode();
+                    }, 1200);
+
+                } catch (err) {
+                    if (animContainer) animContainer.style.display = "none";
+                    if (err.errorType === "USER_NOT_FOUND" || err.status === 404) {
+                        setMessageIn(
+                            `This email is not registered. Please register. <a onclick="switchToSignUpWithEmail('${email}')" style="color: #2563eb; font-weight: 700; text-decoration: underline; cursor: pointer; margin-left: 4px;">Sign Up here</a>`,
+                            "error"
+                        );
+                    } else {
+                        setMessageIn(err.message || "Failed to send reset code", "error");
+                    }
+                    btnSubmitIn.disabled = false;
+                    btnSubmitIn.value = "Send Reset Code";
+                }
+            }
+
+            // B. VERIFY OTP MODE - Step 2: Verify 6-Digit Code (POST /users/verify-reset-otp)
+            else if (isOtpVerifyMode) {
+                if (!resetToken) {
+                    setMessageIn("Please enter the 6-digit OTP code.", "error");
+                    return;
+                }
+
+                const btnSubmitIn = document.getElementById("btnSubmitIn");
+                btnSubmitIn.disabled = true;
+                btnSubmitIn.value = "Verifying...";
+
+                const animContainer = document.getElementById("resetAnimContainer");
+                const animVideo = document.getElementById("resetAnimVideo");
+                const animSource = document.getElementById("resetAnimVideoSource");
+
+                setMessageIn("Verifying reset code...", "loading");
+                try {
+                    const res = await fetch(`${API_URL}/users/verify-reset-otp`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            email: pendingResetEmail,
+                            otp: resetToken
+                        })
+                    });
+                    const data = await res.json();
+
+                    if (!res.ok) throw new Error(data.message || "Invalid OTP code");
+
+                    // Play Correct Password animation on valid OTP!
+                    if (animContainer) animContainer.style.display = "block";
+                    if (animVideo && animSource) {
+                        animSource.src = "animation/correct-password.webm";
+                        animVideo.load();
+                        animVideo.currentTime = 0;
+                        animVideo.play().catch(() => {});
+                    }
+
+                    pendingResetOtp = resetToken;
+                    setMessageIn("OTP verified successfully! Now enter your new password.", "success");
+                    setTimeout(() => {
+                        btnSubmitIn.disabled = false;
+                        setNewPasswordMode();
+                    }, 1800);
+
+                } catch (err) {
+                    // Play Auth Failed animation on invalid OTP!
+                    if (animContainer) animContainer.style.display = "block";
+                    if (animVideo && animSource) {
+                        animSource.src = "animation/auth-failed.webm";
+                        animVideo.load();
+                        animVideo.currentTime = 0;
+                        animVideo.play().catch(() => {});
+                    }
+
+                    setMessageIn(err.message || "Invalid or expired OTP", "error");
+                    btnSubmitIn.disabled = false;
+                    btnSubmitIn.value = "Verify Code";
+                }
+            }
+
+            // C. RESET PASSWORD MODE - Step 3: Set New Password (POST /users/reset-password)
+            else if (isResetMode) {
+                if (!password) {
+                    setMessageIn("Please enter your new password.", "error");
+                    return;
+                }
+
+                const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+                if (!passwordRegex.test(password)) {
+                    setMessageIn("Password must be at least 8 characters long and contain uppercase, lowercase, and a number.", "error");
+                    return;
+                }
+
+                const btnSubmitIn = document.getElementById("btnSubmitIn");
+                btnSubmitIn.disabled = true;
+                btnSubmitIn.value = "Updating...";
+
+                setMessageIn("Updating password...", "loading");
+                try {
+                    const res = await fetch(`${API_URL}/users/reset-password`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            email: pendingResetEmail,
+                            otp: pendingResetOtp,
+                            newPassword: password
+                        })
+                    });
+                    const data = await res.json();
+
+                    if (!res.ok) throw new Error(data.message || "Password update failed");
+
+                    setMessageIn("🎉 Password reset successfully! Please sign in with your new password.", "success");
+
+                    const reqContainer = document.getElementById("resetPasswordRequirements");
+                    if (reqContainer) reqContainer.style.display = "none";
+
+                    setTimeout(() => {
+                        btnSubmitIn.disabled = false;
+                        const emailInput = document.getElementById("email");
+                        if (emailInput) emailInput.value = pendingResetEmail;
+                        toggleForgotMode(false);
+                    }, 2000);
+
+                } catch (err) {
+                    setMessageIn(err.message || "Failed to update password", "error");
+                    btnSubmitIn.disabled = false;
+                    btnSubmitIn.value = "Update Password";
+                }
+            }
+
+            // C. LOGIN MODE (POST /users/login)
+            else {
+                if (isSubmittingLogin) return;
+
+                if (!email || !password) {
+                    setMessageIn("Email and password are required.", "error");
+                    return;
+                }
+
+                hideWrongPasswordAlert();
+
+                const btnSubmitIn = document.getElementById("btnSubmitIn");
+                isSubmittingLogin = true;
+                if (btnSubmitIn) {
+                    btnSubmitIn.disabled = true;
+                    btnSubmitIn.value = "Authenticating...";
+                }
+
+                setMessageIn("Authenticating credentials...", "loading");
+
+                try {
+                    const res = await fetch(`${API_URL}/users/login`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email, password })
+                    });
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        const err = new Error(data.message || "Login failed");
+                        err.errorType = data.errorType || (res.status === 404 ? "USER_NOT_FOUND" : "WRONG_PASSWORD");
+                        err.status = res.status;
+                        throw err;
+                    }
+
+                    if (!data.token) {
+                        throw new Error("Authentication failed: Server did not return a valid session token.");
+                    }
+
+                    // Save JWT token & User details into localStorage
+                    localStorage.setItem("token", data.token);
+                    localStorage.setItem("user", JSON.stringify(data.user || {}));
+
+                    setMessageIn("Login successful! Loading...", "success");
+
+                    // Trigger white screen transition & play correct password animation
+                    playLoginSuccessAnimation(data.user);
+
+                } catch (err) {
+                    isSubmittingLogin = false;
+                    if (btnSubmitIn) {
+                        btnSubmitIn.disabled = false;
+                        btnSubmitIn.value = "Login";
+                    }
+                    const isUserNotFound = err.errorType === "USER_NOT_FOUND" || err.status === 404;
+                    const errorMsg = isUserNotFound
+                        ? (err.message || "This email is not registered. Please register.")
+                        : (err.message || "Invalid credentials");
+
+                    setMessageIn(errorMsg, "error");
+                    showLoginAlert(isUserNotFound ? "USER_NOT_FOUND" : (err.errorType || "WRONG_PASSWORD"), errorMsg, email);
+                }
+            }
+        }
+
+        function playLoginSuccessAnimation(user) {
+            hideWrongPasswordAlert();
+
+            const container = document.getElementById("successLoginContainer");
+            const video = document.getElementById("correctPasswordVideo");
+
+            const doRedirect = () => {
+                const u = user || {};
+                const isAdmin = (u.isadmin === true || u.isadmin === "true" || u.isAdmin === true || u.role === "admin");
+                if (isAdmin) {
+                    window.location.href = "admin.html";
+                } else {
+                    window.location.href = "home.html";
+                }
+            };
+
+            if (container && video) {
+                container.style.display = "block";
+                video.currentTime = 0;
+
+                let hasRedirected = false;
+                const safeRedirect = () => {
+                    if (!hasRedirected) {
+                        hasRedirected = true;
+                        doRedirect();
+                    }
+                };
+
+                video.onended = safeRedirect;
+
+                const playPromise = video.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(() => {
+                        setTimeout(safeRedirect, 1500);
+                    });
+                }
+
+                setTimeout(safeRedirect, 2600);
+            } else {
+                doRedirect();
+            }
+        }
+
+        // 2. SIGN UP SUBMIT HANDLER (POST /users/create)
+        async function handleSignUpSubmit(event) {
+            event.preventDefault();
+            setMessageUp("", "");
+
+            const firstname = document.getElementById("firstname").value.trim();
+            const lastname = document.getElementById("lastname").value.trim();
+            const email = document.getElementById("emailReg").value.trim().toLowerCase();
+            const password = document.getElementById("passwordReg").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+
+            if (!firstname) {
+                setMessageUp("First name is required.", "error");
+                return;
+            }
+            if (firstname.length < 2 || firstname.length > 50) {
+                setMessageUp("First name must be between 2 and 50 characters.", "error");
+                return;
+            }
+
+            if (!lastname) {
+                setMessageUp("Last name is required.", "error");
+                return;
+            }
+            if (lastname.length < 2 || lastname.length > 50) {
+                setMessageUp("Last name must be between 2 and 50 characters.", "error");
+                return;
+            }
+
+            if (!email) {
+                setMessageUp("Email address is required.", "error");
+                return;
+            }
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                setMessageUp("Please enter a valid email address.", "error");
+                return;
+            }
+
+            if (!password) {
+                setMessageUp("Password is required.", "error");
+                return;
+            }
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+            if (!passwordRegex.test(password)) {
+                setMessageUp("Password must be at least 8 characters long and contain uppercase, lowercase, and a number.", "error");
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                setMessageUp("Passwords do not match.", "error");
+                return;
+            }
+
+            const btnSubmitUp = document.getElementById("btnSubmitUp");
+            btnSubmitUp.disabled = true;
+            btnSubmitUp.value = "Creating...";
+            setMessageUp("Creating account...", "loading");
+
+            try {
+                const res = await fetch(`${API_URL}/users/create`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        firstname,
+                        lastname,
+                        email,
+                        password
+                    })
+                });
+
+                let data = null;
+                const contentType = res.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    try {
+                        data = await res.json();
+                    } catch (e) {
+                        data = null;
+                    }
+                }
+
+                if (!res.ok) {
+                    if (res.status === 409) {
+                        throw new Error((data && data.message) || "User already exists");
+                    } else if (res.status === 400) {
+                        throw new Error((data && data.message) || "Invalid registration data.");
+                    } else if (res.status === 502 || res.status === 504) {
+                        throw new Error(`Server unavailable (Cloudflare ${res.status}). Please try again later.`);
+                    } else if (res.status >= 500) {
+                        throw new Error((data && data.message) || `Server error (${res.status}). Please try again later.`);
+                    } else {
+                        throw new Error((data && data.message) || `Registration failed (${res.status}).`);
+                    }
+                }
+
+                setMessageUp("Account created! Verification code sent.", "success");
+                pendingVerificationEmail = email;
+                document.getElementById("signUpForm").reset();
+                
+                setTimeout(() => {
+                    showOtpVerificationView();
+                }, 1000);
+
+            } catch (err) {
+                let errText = err.message || "Registration failed.";
+                if (err.name === "TypeError" || errText.includes("Failed to fetch")) {
+                    errText = "Network failure: Unable to connect to server.";
+                }
+                setMessageUp(errText, "error");
+            } finally {
+                btnSubmitUp.disabled = false;
+                btnSubmitUp.value = "Sign up";
+            }
+        }
+
+        // 3. OTP VERIFICATION HANDLER (POST /users/verify-email)
+        async function handleVerifyOtp(event) {
+            event.preventDefault();
+            setMessageOtp("", "");
+
+            const otp = document.getElementById("otpInput").value.trim();
+
+            if (!otp) {
+                setMessageOtp("Please enter the 6-digit verification code.", "error");
+                return;
+            }
+
+            if (otp.length !== 6 || !/^\d{6}$/.test(otp)) {
+                setMessageOtp("OTP must be exactly 6 digits.", "error");
+                return;
+            }
+
+            if (!pendingVerificationEmail) {
+                setMessageOtp("Registration session expired. Please register again.", "error");
+                return;
+            }
+
+            const btnVerifyOtp = document.getElementById("btnVerifyOtp");
+            btnVerifyOtp.disabled = true;
+            btnVerifyOtp.textContent = "Verifying...";
+            setMessageOtp("Verifying code...", "loading");
+
+            try {
+                const res = await fetch(`${API_URL}/users/verify-email`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        email: pendingVerificationEmail,
+                        otp: otp
+                    })
+                });
+
+                let data = null;
+                try {
+                    data = await res.json();
+                } catch (_) {}
+
+                if (!res.ok) {
+                    if (res.status === 400) {
+                        throw new Error((data && data.message) || "Invalid OTP code.");
+                    } else if (res.status === 404) {
+                        throw new Error((data && data.message) || "User not found.");
+                    } else {
+                        throw new Error((data && data.message) || `Verification failed (${res.status}).`);
+                    }
+                }
+
+                // Play Auth Success animation!
+                const video = document.getElementById("authOtpVideo");
+                const source = document.getElementById("authOtpVideoSource");
+                if (video && source) {
+                    source.src = "animation/auth-success.webm";
+                    video.load();
+                    video.currentTime = 0;
+                    video.play().catch(() => {});
+                }
+
+                setMessageOtp("🎉 Email verified successfully! Switching to sign in...", "success");
+
+                setTimeout(() => {
+                    document.getElementById("otpVerificationView").style.display = "none";
+                    document.getElementById("signUpForm").style.display = "flex";
+                    container.classList.remove("sign-up-mode");
+
+                    const loginEmailField = document.getElementById("email");
+                    if (loginEmailField) loginEmailField.value = pendingVerificationEmail;
+
+                    setMessageIn("Email verified successfully! Please sign in with your password.", "success");
+                    pendingVerificationEmail = "";
+                }, 2400);
+
+            } catch (err) {
+                // Play Auth Failed animation!
+                const video = document.getElementById("authOtpVideo");
+                const source = document.getElementById("authOtpVideoSource");
+                if (video && source) {
+                    source.src = "animation/auth-failed.webm";
+                    video.load();
+                    video.currentTime = 0;
+                    video.play().catch(() => {});
+                }
+
+                let errText = err.message || "Verification failed.";
+                if (err.name === "TypeError" || errText.includes("Failed to fetch")) {
+                    errText = "Network error: Unable to connect to server.";
+                }
+                setMessageOtp(errText, "error");
+            } finally {
+                btnVerifyOtp.disabled = false;
+                btnVerifyOtp.textContent = "Verify Email";
+            }
+        }
+
+        // 4. RESEND OTP HANDLER (POST /users/resend-otp)
+        async function handleResendOtp(event) {
+            if (event) event.preventDefault();
+            setMessageOtp("", "");
+
+            if (!pendingVerificationEmail) {
+                setMessageOtp("Registration session expired. Please register again.", "error");
+                return;
+            }
+
+            // Play Resend animation!
+            const video = document.getElementById("authOtpVideo");
+            const source = document.getElementById("authOtpVideoSource");
+            if (video && source) {
+                source.src = "animation/resend.webm";
+                video.load();
+                video.currentTime = 0;
+                video.play().catch(() => {});
+            }
+
+            const btnResendOtp = document.getElementById("btnResendOtp");
+            btnResendOtp.disabled = true;
+            btnResendOtp.textContent = "Sending...";
+            setMessageOtp("Sending new verification code...", "loading");
+
+            try {
+                const res = await fetch(`${API_URL}/users/resend-otp`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        email: pendingVerificationEmail
+                    })
+                });
+
+                let data = null;
+                try {
+                    data = await res.json();
+                } catch (_) {}
+
+                if (!res.ok) {
+                    throw new Error((data && data.message) || `Failed to resend code (${res.status}).`);
+                }
+
+                setMessageOtp("A new 6-digit code has been sent to your email!", "success");
+
+                // Return to main auth video after resend animation (2.5s)
+                setTimeout(() => {
+                    if (video && source && source.src.includes("resend.webm")) {
+                        source.src = "animation/auth.webm";
+                        video.load();
+                        video.currentTime = 0;
+                        video.play().catch(() => {});
+                    }
+                }, 2500);
+
+                // Cooldown 15 seconds
+                let count = 15;
+                const timer = setInterval(() => {
+                    count--;
+                    if (count <= 0) {
+                        clearInterval(timer);
+                        btnResendOtp.disabled = false;
+                        btnResendOtp.textContent = "Resend Code";
+                    } else {
+                        btnResendOtp.textContent = `Resend (${count}s)`;
+                    }
+                }, 1000);
+
+            } catch (err) {
+                let errText = err.message || "Resend failed.";
+                if (err.name === "TypeError" || errText.includes("Failed to fetch")) {
+                    errText = "Network error: Unable to connect to server.";
+                }
+                setMessageOtp(errText, "error");
+                btnResendOtp.disabled = false;
+                btnResendOtp.textContent = "Resend Code";
+            }
+        }
+
+        function validatePasswordRequirements(val, prefix = "req-", containerId = "passwordRequirements") {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            if (!val || val.length === 0) {
+                container.style.display = "none";
+                return;
+            }
+
+            container.style.display = "block";
+
+            const checks = {
+                [prefix + "length"]: val.length >= 8,
+                [prefix + "upper"]: /[A-Z]/.test(val),
+                [prefix + "lower"]: /[a-z]/.test(val),
+                [prefix + "number"]: /[0-9]/.test(val),
+                [prefix + "special"]: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(val)
+            };
+
+            for (const [id, isValid] of Object.entries(checks)) {
+                const el = document.getElementById(id);
+                if (!el) continue;
+
+                const iconEl = el.querySelector(".req-icon");
+                if (isValid) {
+                    if (iconEl) iconEl.textContent = "🟢";
+                    el.style.background = "#f0fdf4";
+                    el.style.color = "#15803d";
+                    el.style.borderColor = "#86efac";
+                    el.style.transform = "scale(1.04)";
+                } else {
+                    if (iconEl) iconEl.textContent = "🔴";
+                    el.style.background = "#fef2f2";
+                    el.style.color = "#dc2626";
+                    el.style.borderColor = "#fca5a5";
+                    el.style.transform = "scale(1)";
+                }
+            }
+        }
+
+        // Auto-redirect if already logged in & reset alert on typing
+        window.addEventListener("DOMContentLoaded", () => {
+            const pwdInput = document.getElementById("password");
+            const emailInput = document.getElementById("email");
+            const pwdRegInput = document.getElementById("passwordReg");
+
+            pwdInput?.addEventListener("input", (e) => {
+                hideWrongPasswordAlert();
+                if (isResetMode) {
+                    validatePasswordRequirements(e.target.value, "reset-req-", "resetPasswordRequirements");
+                }
+            });
+
+            emailInput?.addEventListener("input", hideWrongPasswordAlert);
+
+            pwdRegInput?.addEventListener("input", (e) => {
+                validatePasswordRequirements(e.target.value);
+            });
+
+            const token = localStorage.getItem("token");
+            if (token) {
+                try {
+                    const u = JSON.parse(localStorage.getItem("user") || "{}");
+                    const isAdmin = (u.isadmin === true || u.isadmin === "true" || u.isAdmin === true || u.role === "admin");
+                    if (isAdmin) {
+                        window.location.href = "admin.html";
+                    } else {
+                        window.location.href = "home.html";
+                    }
+                } catch (_) { }
+            }
+        });
+    </script>
+</body>
+
+</html>
