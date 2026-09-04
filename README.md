@@ -1,843 +1,512 @@
-# G-Lab
+# DevOps Home Lab – G-Lab
 
-A modern full-stack e-commerce web application for browsing, managing, and purchasing computer parts online.
+A production-style DevOps home lab demonstrating **CI/CD automation, containerization, private image management, self-hosted GitHub Actions runners, automated deployment, and infrastructure monitoring**.
 
-## Features
+---
 
-* User Registration & Login
-* JWT-based Authentication
-* Browse Computer Parts
-* Search Products
-* Product Filtering
-* Shopping Cart
-* Product Reviews
-* Secure Checkout
-* PayHere Payment Integration
-* Admin Dashboard
-* Product Management
-* Firebase Image Storage
-* MongoDB Database
-* Responsive Web Interface
+## Project Overview
 
-## Tech Stack
+This project deploys the **G-Lab full-stack web application** using a complete DevOps workflow.
 
-### Frontend
+The application consists of:
 
-* HTML
-* CSS
-* JavaScript
+* Frontend – HTML, CSS and JavaScript
+* Backend – Node.js and Express.js
+* Database – MongoDB
+* Containerization – Docker
+* CI/CD – GitHub Actions
+* Container Registry – GitHub Container Registry (GHCR)
+* Production Server – Linux
+* Monitoring – Prometheus and Grafana
+* System Metrics – Node Exporter
+
+The main objective is to automate the journey from **Git push → Docker build → image push → production deployment → monitoring**.
+
+---
+
+## DevOps Architecture
+
+```text
+                    Developer
+                       │
+                       │ git push
+                       ▼
+                ┌───────────────┐
+                │    GitHub     │
+                │   Repository  │
+                └───────┬───────┘
+                        │
+                        ▼
+              ┌───────────────────┐
+              │  GitHub Actions   │
+              │      CI/CD        │
+              └─────────┬─────────┘
+                        │
+                        ▼
+             ┌─────────────────────┐
+             │  Self-Hosted Runner │
+             │     Linux Server    │
+             └──────────┬──────────┘
+                        │
+             ┌──────────┴──────────┐
+             │                     │
+             ▼                     ▼
+      ┌─────────────┐       ┌─────────────┐
+      │   Backend   │       │  Frontend   │
+      │ Docker Image│       │ Docker Image│
+      └──────┬──────┘       └──────┬──────┘
+             │                     │
+             └──────────┬──────────┘
+                        ▼
+              ┌───────────────────┐
+              │       GHCR        │
+              │ GitHub Container  │
+              │     Registry      │
+              └─────────┬─────────┘
+                        │
+                        │ docker pull
+                        ▼
+              ┌───────────────────┐
+              │  Production Linux │
+              │      Server       │
+              └─────────┬─────────┘
+                        │
+                ┌───────┴────────┐
+                │                │
+                ▼                ▼
+        ┌──────────────┐  ┌──────────────┐
+        │   Backend    │  │   Frontend   │
+        │ Docker :3001 │  │ Nginx :8080  │
+        └──────────────┘  └──────────────┘
+
+
+Monitoring:
+
+Linux Server
+      │
+      ▼
+Node Exporter
+      │
+      ▼
+Prometheus
+      │
+      ▼
+Grafana
+```
+
+---
+
+## CI/CD Pipeline
+
+The project uses **GitHub Actions** with a self-hosted Linux runner.
+
+Whenever code is pushed to the `main` branch, the pipeline automatically:
+
+1. Checks out the repository
+2. Logs in to GitHub Container Registry
+3. Builds the backend Docker image
+4. Pushes the backend image to GHCR
+5. Builds the frontend Docker image
+6. Pushes the frontend image to GHCR
+7. Pulls the latest images on the production server
+8. Stops the previous application containers
+9. Removes the old containers
+10. Starts the new backend container
+11. Starts the new frontend container
+
+### Pipeline Flow
+
+```text
+Git Push
+   ↓
+GitHub Actions
+   ↓
+Self-Hosted Runner
+   ↓
+Docker Build
+   ↓
+GHCR Push
+   ↓
+Production Docker Pull
+   ↓
+Old Containers Removed
+   ↓
+New Containers Started
+   ↓
+Application Updated
+```
+
+---
+
+## Technologies Used
+
+| Category           | Technology                        |
+| ------------------ | --------------------------------- |
+| Version Control    | Git / GitHub                      |
+| CI/CD              | GitHub Actions                    |
+| Runner             | GitHub Actions Self-Hosted Runner |
+| Containers         | Docker                            |
+| Container Registry | GitHub Container Registry         |
+| Backend            | Node.js / Express.js              |
+| Frontend           | HTML / CSS / JavaScript           |
+| Database           | MongoDB                           |
+| Web Server         | Nginx                             |
+| Monitoring         | Prometheus                        |
+| Visualization      | Grafana                           |
+| System Metrics     | Node Exporter                     |
+| Operating System   | Ubuntu Linux                      |
+
+---
+
+## Docker Architecture
+
+The application is separated into two containers.
 
 ### Backend
 
-* Node.js
-* Express.js
-* REST API
+```text
+g-lab-backend
+      │
+      └── Node.js / Express
+              │
+              └── Port 3001
+```
 
-### Database
+### Frontend
 
-* MongoDB
-* MongoDB Atlas
+```text
+g-lab-frontend
+      │
+      └── Nginx
+              │
+              └── Port 8080 → Container Port 80
+```
 
-### Authentication & Security
+### Production Containers
 
-* JSON Web Token (JWT)
-* bcrypt
-* Environment Variables
-* Authentication Middleware
-* Admin Authorization Middleware
+```text
+g-lab-backend
+    └── 3001:3001
 
-### Storage
+g-lab-frontend
+    └── 8080:80
 
-* Firebase Storage
+Prometheus
+    └── 9090:9090
 
-### Payment
+Grafana
+    └── 3000:3000
 
-* PayHere Payment Gateway
+Node Exporter
+    └── 9100
+```
 
-### Deployment
+---
 
-* Render
+## GitHub Container Registry
 
-### Version Control
+Docker images are stored in **GitHub Container Registry (GHCR)**.
 
-* Git
-* GitHub
+### Backend Image
 
-## System Architecture
+```text
+ghcr.io/kavindugeethshan/g-lab-backend:latest
+```
 
-                    ┌─────────────────┐
-                    │     User        │
-                    └────────┬────────┘
-                             │
-                             ▼
-                    ┌─────────────────┐
-                    │    Frontend     │
-                    │ HTML/CSS/JS     │
-                    └────────┬────────┘
-                             │
-                        REST API
-                             │
-                             ▼
-                    ┌─────────────────┐
-                    │    Backend      │
-                    │ Node.js         │
-                    │ Express.js      │
-                    └──────┬───┬──────┘
-                           │   │
-              ┌────────────┘   └──────────────┐
-              ▼                               ▼
-      ┌─────────────────┐             ┌─────────────────┐
-      │  MongoDB Atlas  │             │ Firebase        │
-      │    Database     │             │ Storage         │
-      └─────────────────┘             └─────────────────┘
+### Frontend Image
 
-                            │
-                            ▼
-                    ┌─────────────────┐
-                    │     PayHere     │
-                    │ Payment Gateway │
-                    └─────────────────┘
+```text
+ghcr.io/kavindugeethshan/g-lab-frontend:latest
+```
 
+This allows the production server to pull the latest application images automatically during deployment.
 
-## Project Structure
+---
 
-G-Lab/
+## Self-Hosted GitHub Actions Runner
+
+Instead of using GitHub-hosted runners, this project uses a **self-hosted Linux runner**.
+
+Runner:
+
+```text
+prabavi-Latitude-5400
+```
+
+Labels:
+
+```text
+self-hosted
+Linux
+X64
+```
+
+The runner executes the CI/CD workflow directly on the Linux production environment.
+
+---
+
+## Monitoring
+
+The infrastructure is monitored using **Prometheus, Node Exporter and Grafana**.
+
+### Monitoring Architecture
+
+```text
+Linux Server
+      │
+      ▼
+Node Exporter :9100
+      │
+      ▼
+Prometheus :9090
+      │
+      ▼
+Grafana :3000
+```
+
+### Node Exporter
+
+Node Exporter exposes Linux system metrics such as:
+
+* CPU usage
+* Memory usage
+* Disk usage
+* Network statistics
+* System load
+* Filesystem metrics
+
+### Prometheus
+
+Prometheus scrapes Node Exporter every **15 seconds**.
+
+Current scrape configuration:
+
+```yaml
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: "linux-server"
+    static_configs:
+      - targets: ["host.docker.internal:9100"]
+```
+
+The Linux server target is successfully reported as:
+
+```text
+health: up
+```
+
+### Grafana
+
+Grafana is used to visualize the Prometheus metrics through a Linux server monitoring dashboard.
+
+---
+
+## Production Deployment
+
+The production environment runs on an Ubuntu Linux server using Docker.
+
+The application is accessible through:
+
+```text
+Frontend: http://SERVER-IP:8080
+Backend:  http://SERVER-IP:3001
+Grafana:  http://SERVER-IP:3000
+Prometheus: http://SERVER-IP:9090
+```
+
+> Replace `SERVER-IP` with the IP address of the production Linux server.
+
+---
+
+## Repository Structure
+
+```text
+Devops-Home-Lab/
 │
-├── Frontend/
-│   ├── HTML files
-│   ├── CSS files
-│   ├── JavaScript files
+├── .github/
+│   └── workflows/
+│       └── docker.yml
+│
+├── frontend/
+│   ├── Dockerfile
+│   ├── index.html
+│   ├── css/
+│   ├── js/
 │   └── assets/
 │
-├── Backend/
-│   ├── models/
-│   ├── controllers/
-│   ├── routes/
-│   ├── middleware/
-│   └── server.js
-│
-├── .gitignore
+├── Dockerfile
+├── .dockerignore
 ├── package.json
+├── package-lock.json
+├── server.js
 └── README.md
-
-
-## Authentication
-
-The application uses JWT-based authentication.
-The authentication flow is:
-
-User
-  │
-  ▼
-Login
-  │
-  ▼
-Backend verifies credentials
-  │
-  ▼
-JWT Token generated
-  │
-  ▼
-Client sends token with requests
-  │
-  ▼
-Authentication Middleware
-  │
-  ▼
-Protected API Route
-
-Passwords are securely hashed using bcrypt before being stored in the database.
-Admin-only operations are protected using authorization middleware.
-
-## Product Management
-
-Administrators can manage products through the admin functionality.
-
-Supported operations include:
-
-* Create products
-* View products
-* Update products
-* Delete products
-* Manage product information
-* Upload product images
-
-Product images are stored using Firebase Storage, while product information is stored in MongoDB.
-
-
-## Payment Integration
-
-G-Lab integrates the PayHere payment gateway for online payments.
-
-### PayHere Sandbox
-
-The PayHere Sandbox environment is used for testing the payment flow during development.
-
-For local development, the application can use a tunneling service to expose the payment notification endpoint to PayHere, since PayHere requires a publicly accessible `notify_url`.
-
-### Production Payment
-
-For production payments, the application requires a publicly accessible backend and domain/HTTPS endpoint for receiving payment notifications from PayHere.
-
-The payment flow is:
-
-Customer
-   │
-   ▼
-Checkout
-   │
-   ▼
-G-Lab Backend
-   │
-   ▼
-PayHere
-   │
-   ▼
-Payment Processing
-   │
-   ▼
-notify_url
-   │
-   ▼
-G-Lab Backend
-   │
-   ▼
-Payment Status Updated
-
-> **Note:** PayHere Sandbox is used for testing. Production payment integration requires a publicly accessible HTTPS endpoint and the appropriate PayHere production configuration.
-
-
-## Database
-
-MongoDB Atlas is used as the application's cloud database.
-The database stores information such as:
-
-* Users
-* Products
-* Reviews
-* Orders
-* Payments
-
-## Image Storage
-
-Firebase Storage is used to store product images.The application stores the image in Firebase Storage and saves the corresponding image URL with the product information in MongoDB.
-
-## Deployment
-
-The application is deployed using Render.
-
-The production architecture is:
-
-GitHub
-   │
-   ▼
-Render
-   │
-   ├── Frontend
-   │
-   └── Backend API
-          │
-          ├── MongoDB Atlas
-          ├── Firebase Storage
-          └── PayHere
-
-
-## Environment Variables
-
-The application uses environment variables for sensitive configuration.
-
-Example:
-
-.env
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-FIREBASE_PROJECT_ID=your_project_id
-FIREBASE_STORAGE_BUCKET=your_storage_bucket
-PAYHERE_MERCHANT_ID=your_merchant_id
-PAYHERE_MERCHANT_SECRET=your_merchant_secret
-
-
-## Installation
-
-### Prerequisites
-
-Make sure the following are installed:
-
-* Node.js
-* npm
-* Git
-
-### 1. Clone the Repository
-
-git clone https://github.com/kavindugeethshan/G-Lab.git
-
-
-
-### 2. Navigate to the Project
-
-cd G-Lab
-
-
-### 3. Install Dependencies
-
-Install all required Node.js dependencies from `package.json`:
-
-npm install
-
-
-The project uses the following major dependencies:
-
-* Express.js
-* Mongoose
-* bcrypt
-* JSON Web Token (JWT)
-* Socket.IO
-* dotenv
-* CORS
-* Firebase
-* Nodemailer
-* Resend
-* Nodemon
-
-### 4. Configure Environment Variables
-
-Create a `.env` file in the backend directory and configure the required environment variables.
-
-Example:
-
-.env
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-FIREBASE_PROJECT_ID=your_project_id
-FIREBASE_STORAGE_BUCKET=your_storage_bucket
-PAYHERE_MERCHANT_ID=your_merchant_id
-PAYHERE_MERCHANT_SECRET=your_merchant_secret
-
-### 5. Start the Application
-
-Start the production server:
-
-npm start
-
-
-For development:
-
-npm run dev
-
-The package.json contains the required npm scripts for starting the application.
-
-## Container Image
-
-A Docker container image for G-Lab is also available through GitHub Container Registry (GHCR).
-
-**GHCR Package:**
-
-https://github.com/kavindugeethshan/G-Lab/pkgs/container/g-lab
-
-
-## API
-
-The G-Lab backend provides RESTful API endpoints for authentication, users, products, cart, orders, reviews, payments, and admin operations.
-
-**Base URL**
-http://localhost:3001
-
-The APIs can be tested using Postman.
-
-**Authentication:** Protected endpoints require a JWT token in the `Authorization` header.
-Authorization: Bearer <JWT_TOKEN>
-
----
-
-### Authentication
-
-#### Create User
-
-**POST**
-http://localhost:3001/users/create
-
-
-Request body:
-
-```json
-{
-  "email": "user@example.com",
-  "firstname": "John",
-  "lastname": "Doe",
-  "password": "your_password"
-}
-```
-
-#### Login User
-
-**POST**
-
-http://localhost:3001/users/login
-
-
-Request body:
-
-```json
-{
-  "email": "user@example.com",
-  "password": "your_password"
-}
 ```
 
 ---
 
-### Products
+## Dockerfile – Backend
 
-#### Get All Products
+The backend uses Node.js 22.
 
-**GET**
-http://localhost:3001/products
+```dockerfile
+FROM node:22
 
+WORKDIR /app
 
-#### Search Products
+COPY package*.json ./
 
-**GET**
-http://localhost:3001/products?search=gaming
+RUN npm ci
 
+COPY . .
 
-#### Filter Products by Category
+EXPOSE 3001
 
-**GET**
-http://localhost:3001/products?category=phone
-
-
-#### Filter by Category, Brand and Price
-
-**GET**
-http://localhost:3001/products?category=GPU&brand=ASUS&minPrice=50000&maxPrice=110000
-
-#### Pagination and Price Sorting
-
-**GET**
-http://localhost:3001/products?page=1&limit=10&sort=price_asc
-
-
-#### Get Product by ID
-
-**GET**
-http://localhost:3001/products/<PRODUCT_ID>
-
-
-#### Create Product
-
-**POST**
-http://localhost:3001/admin/products/create
-
-
-Admin token required.
-
-Example request body:
-
-```json
-{
-  "name": "AMD Ryzen 5 5600",
-  "description": "High-performance 6-core desktop processor.",
-  "category": "CPU",
-  "brand": "AMD",
-  "price": 35000,
-  "stock": 10,
-  "Image": "ryzen5-5600.jpg"
-}
-```
-
-#### Create Multiple Products
-
-**POST**
-http://localhost:3001/products/create-many
-
-
-#### Update Product
-
-**PUT**
-http://localhost:3001/products/update/<PRODUCT_ID>
-
-
-Admin token required.
-
-Example:
-
-```json
-{
-  "price": 24000,
-  "stock": 20
-}
-```
-
-#### Delete Product
-
-**DELETE**
-http://localhost:3001/products/delete/<PRODUCT_ID>
-
-
-Admin token required.
-
-#### Get Product Rating
-
-**GET**
-http://localhost:3001/products/<PRODUCT_ID>/rating
-
-
-Authentication not required.
-
----
-
-### User
-
-#### Add Address
-
-**PUT**
-http://localhost:3001/users/address
-
-
-Authentication required.
-
-```json
-{
-  "addressLine": "123 Main Street",
-  "city": "Kurunegala",
-  "district": "Kurunegala",
-  "postalCode": "60000"
-}
-```
-
-#### Get Profile
-
-**GET**
-http://localhost:3001/users/profile
-
-
-Authentication required.
-
-#### Update Profile
-
-**PUT**
-http://localhost:3001/users/profile
-
-
-Authentication required.
-
-```json
-{
-  "firstname": "John",
-  "lastname": "Doe",
-  "Image": "https://example.com/profile.jpg"
-}
-```
-
-#### Change Password
-
-**PUT**
-http://localhost:3001/users/change-password
-
-Authentication required.
-
-```json
-{
-  "currentPassword": "current_password",
-  "newPassword": "new_password"
-}
+CMD ["node", "server.js"]
 ```
 
 ---
 
-### Cart
+## Dockerfile – Frontend
 
-#### Add Product to Cart
+The frontend is served using Nginx.
 
-**POST**
-http://localhost:3001/cart/add
+```dockerfile
+FROM nginx:alpine
 
+COPY . /usr/share/nginx/html
 
-Authentication required.
-
-```json
-{
-  "productId": "<PRODUCT_ID>",
-  "quantity": 1
-}
-```
-
-#### Get Cart
-
-**GET**
-http://localhost:3001/cart
-
-
-Authentication required.
-
----
-
-### Orders
-
-#### Create Order
-
-**POST**
-http://localhost:3001/order
-
-
-Authentication required.
-
-#### Get My Orders
-
-**GET**
-http://localhost:3001/order/my-orders
-
-
-Authentication required.
-
-#### Get Order by ID
-
-**GET**
-http://localhost:3001/order/<ORDER_ID>
-
-
-Authentication required.
-
-#### Cancel Order
-
-**PATCH**
-http://localhost:3001/order/orders/<ORDER_ID>/cancel
-
-
-Authentication required.
-
----
-
-### Reviews
-
-#### Add Product Review
-
-**POST**
-http://localhost:3001/products/<PRODUCT_ID>/reviews
-
-
-Authentication required.
-
-```json
-{
-  "rating": 5,
-  "comment": "Great product!"
-}
-```
-
-#### Update Own Review
-
-**PUT**
-http://localhost:3001/reviews/<REVIEW_ID>
-
-
-Authentication required.
-
-#### Delete Own Review
-
-**DELETE**
-http://localhost:3001/reviews/<REVIEW_ID>
-
-
-Authentication required.
-
----
-
-### Admin
-
-#### Admin Dashboard
-
-**GET**
-http://localhost:3001/admin/dashboard
-
-
-Admin token required.
-
-#### Get All Users
-
-**GET**
-http://localhost:3001/admin/users
-
-
-Admin token required.
-
-#### Get User Details
-
-**GET**
-http://localhost:3001/admin/users/<USER_ID>
-
-
-Admin token required.
-
-#### Block User
-
-**PATCH**
-http://localhost:3001/admin/users/<USER_ID>/block
-
-
-Admin token required.
-
-#### Unblock User
-
-**PATCH**
-http://localhost:3001/admin/users/<USER_ID>/unblock
-
-
-Admin token required.
-
-#### Get All Reviews
-
-**GET**
-http://localhost:3001/admin/reviews
-
-
-Admin token required.
-
-#### Delete Review
-
-**DELETE**
-http://localhost:3001/admin/reviews/<REVIEW_ID>
-
-
-Admin token required.
-
-#### Get Admin Statistics
-
-**GET**
-http://localhost:3001/admin/statistics
-
-
-Admin token required.
-
----
-
-### Admin Order Management
-
-#### Get All Orders
-
-**GET**
-http://localhost:3001/admin/orders
-
-
-Admin token required.
-
-#### Get Order by ID
-
-**GET**
-http://localhost:3001/admin/orders/<ORDER_ID>
-
-
-Admin token required.
-
-#### Search Orders by Order ID
-
-**GET**
-http://localhost:3001/admin/orders/search?orderId=<ORDER_ID>
-
-
-Admin token required.
-
-#### Search Orders by User ID
-
-**GET**
-http://localhost:3001/admin/orders/search?userId=<USER_ID>
-
-Admin token required.
-
-#### Search Orders by Email
-
-**GET**
-http://localhost:3001/admin/orders/search?email=user@example.com
-
-
-Admin token required.
-
-#### Filter Orders by Status
-
-**GET**
-http://localhost:3001/admin/orders/filter?status=Pending
-
-
-Admin token required.
-
-#### Update Order Status
-
-**PATCH**
-http://localhost:3001/admin/orders/<ORDER_ID>/status
-
-
-Admin token required.
-
-Example:
-
-```json
-{
-  "status": "Confirmed"
-}
+EXPOSE 80
 ```
 
 ---
 
-### Postman Testing
+## GitHub Actions Workflow
 
-The API can be tested locally using Postman.
+The workflow is triggered when changes are pushed to `main`.
 
-For protected endpoints:
+```yaml
+on:
+  push:
+    branches:
+      - main
+```
 
-1. Login and obtain the JWT token.
-2. Open the required request in Postman.
-3. Go to **Authorization**.
-4. Select **Bearer Token**.
-5. Enter the JWT token.
-6. Send the request.
+The workflow uses the self-hosted runner:
 
-Bearer <JWT_TOKEN>
+```yaml
+runs-on: self-hosted
+```
 
+It also grants the workflow permission to publish packages to GHCR:
 
+```yaml
+permissions:
+  contents: read
+  packages: write
+```
+
+---
 
 ## Security
 
-The application implements several security mechanisms:
+Sensitive environment variables are **not stored inside the Docker image or Git repository**.
 
-* Password hashing with bcrypt
-* JWT authentication
-* Protected routes
-* Admin authorization
-* Environment-based secrets
-* Server-side validation
-* CORS configuration
+The production backend receives environment variables using:
+
+```text
+--env-file ~/.env
+```
+
+The `.dockerignore` also prevents sensitive/local files from being included in the Docker build context.
+
+```text
+.env
+node_modules
+.git
+npm-debug.log
+```
+
+---
+
+## Key DevOps Concepts Demonstrated
+
+This project demonstrates practical experience with:
+
+* Git version control
+* GitHub repositories
+* GitHub Actions
+* CI/CD automation
+* Self-hosted runners
+* Docker image creation
+* Docker container management
+* GitHub Container Registry
+* Automated production deployment
+* Linux server administration
+* Nginx
+* Prometheus
+* Grafana
+* Node Exporter
+* Infrastructure monitoring
+* Environment variable management
+* Production-style deployment workflows
+
+---
+
+## Evidence
+
+The project includes evidence of the implemented DevOps pipeline and monitoring infrastructure.
+
+### CI/CD
+
+* GitHub Actions successful pipeline
+* Docker image build and push
+* GHCR container images
+* Self-hosted runner online
+* Automatic production deployment
+
+### Production
+
+* Running backend and frontend Docker containers
+* Application accessible from the production server
+
+### Monitoring
+
+* Node Exporter running
+* Prometheus Linux server target showing `UP`
+* Grafana Linux server monitoring dashboard
+
+---
 
 ## Future Improvements
 
-Possible future improvements include:
+Potential future improvements include:
 
+* Application-level Prometheus metrics
+* Docker container monitoring with cAdvisor
+* Alertmanager notifications
+* HTTPS with a reverse proxy
+* Infrastructure as Code using Terraform
 * Kubernetes deployment
-* Automated CI/CD pipeline
-* Prometheus monitoring
-* Grafana dashboards
-* Redis caching
-* Automated testing
+* Automated rollback strategy
+* Blue/Green or Canary deployments
+* Centralized logging
 * AWS cloud deployment
-* Improved application logging
 
-## Current Version
+---
 
-**v1.0.2**
+## Project Goal
 
-Latest release includes security improvements, authentication fixes, admin user-management improvements, and mobile-responsive UI updates.
+The goal of this project is to build a practical **DevOps home lab** that demonstrates how a full-stack application can be continuously integrated, containerized, stored in a container registry, automatically deployed to a Linux production server, and monitored using industry-standard DevOps tools.
+
+---
 
 ## Author
 
 **Kavindu Geethshan**
-
-Bachelor of Information Technology (BIT)
-University of Colombo School of Computing
-
-GitHub:
-https://github.com/kavindugeethshan
-
----
+Bachelor of Information Technology (BIT) University of Colombo School of Computing
+GitHub: https://github.com/kavindugeethshan
 
 ## License
-
 This project is developed for educational and portfolio purposes.
