@@ -1,3 +1,4 @@
+
 name: Docker Build and Push
 
 on:
@@ -8,6 +9,7 @@ on:
 jobs:
   docker:
     runs-on: self-hosted
+
     permissions:
       contents: read
       packages: write
@@ -44,3 +46,23 @@ jobs:
         run: |
           docker push \
             ghcr.io/${{ github.repository_owner }}/g-lab-frontend:latest
+
+      - name: Deploy to production
+        run: |
+          docker pull ghcr.io/${{ github.repository_owner }}/g-lab-backend:latest
+          docker pull ghcr.io/${{ github.repository_owner }}/g-lab-frontend:latest
+
+          docker stop g-lab-backend g-lab-frontend || true
+          docker rm g-lab-backend g-lab-frontend || true
+
+          docker run -d \
+            --name g-lab-backend \
+            -p 3001:3001 \
+            --env-file ~/.env \
+            ghcr.io/${{ github.repository_owner }}/g-lab-backend:latest
+
+          docker run -d \
+            --name g-lab-frontend \
+            -p 8080:80 \
+            ghcr.io/${{ github.repository_owner }}/g-lab-frontend:latest
+
