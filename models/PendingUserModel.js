@@ -19,6 +19,11 @@ const pendingUserSchema = new mongoose.Schema(
       required: true,
       trim: true
     },
+    phone: {
+      type: String,
+      trim: true,
+      default: ""
+    },
     password: {
       type: String,
       required: true
@@ -33,6 +38,14 @@ const pendingUserSchema = new mongoose.Schema(
     emailverificationotpexpires: {
       type: Date,
       required: true
+    },
+    otpAttempts: {
+      type: Number,
+      default: 0
+    },
+    lastOtpSentAt: {
+      type: Date,
+      default: Date.now
     }
   },
   {

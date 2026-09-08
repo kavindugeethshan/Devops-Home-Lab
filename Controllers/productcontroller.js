@@ -274,27 +274,28 @@ export const getallProducts = async (req, res) => {
       sort,
     } = req.query;
 
-    // Pagination
-    const currentPage = Number(page) || 1;
+    // Pagination (bounded to max 1000 to prevent DoS)
+    const currentPage = Math.max(Number(page) || 1, 1);
     let itemsPerPage = 10;
     if (limit === "0" || limit === "all" || limit === "1000") {
-      itemsPerPage = 10000;
+      itemsPerPage = 1000;
     } else if (Number(limit) > 0) {
-      itemsPerPage = Number(limit);
+      itemsPerPage = Math.min(Math.max(Number(limit), 1), 1000);
     }
     const skip = (currentPage - 1) * itemsPerPage;
 
     const filter = { isActive: { $ne: false } };
 
     // Search
-    if (search) {
-      const safeSearch = escapeRegex(search);
-
-      filter.$or = [
-        { name: { $regex: safeSearch, $options: "i" } },
-        { category: { $regex: safeSearch, $options: "i" } },
-        { brand: { $regex: safeSearch, $options: "i" } },
-      ];
+    if (search && typeof search === "string") {
+      const safeSearch = escapeRegex(search.trim());
+      if (safeSearch.length > 0) {
+        filter.$or = [
+          { name: { $regex: safeSearch, $options: "i" } },
+          { category: { $regex: safeSearch, $options: "i" } },
+          { brand: { $regex: safeSearch, $options: "i" } },
+        ];
+      }
     }
 
     // Filter by multiple categories (with alias mapping)
@@ -323,7 +324,8 @@ export const getallProducts = async (req, res) => {
         "drone": ["Drones", "Drone", "Drone Zone", "Next-Gen Drone Collection"]
       };
 
-      const rawItems = category
+      const categoryStr = typeof category === "string" ? category : (Array.isArray(category) ? category.join(",") : "");
+      const rawItems = categoryStr
         .split(",")
         .map((item) => item.trim())
         .filter(Boolean);
@@ -338,21 +340,26 @@ export const getallProducts = async (req, res) => {
         }
       });
 
-      filter.category = {
-        $in: expandedCategories.map((item) => new RegExp(`^${escapeRegex(item)}$`, "i"))
-      };
+      if (expandedCategories.length > 0) {
+        filter.category = {
+          $in: expandedCategories.map((item) => new RegExp(`^${escapeRegex(item)}$`, "i"))
+        };
+      }
     }
 
     // Filter by multiple brands
     if (brand) {
-      const brands = brand
+      const brandStr = typeof brand === "string" ? brand : (Array.isArray(brand) ? brand.join(",") : "");
+      const brands = brandStr
         .split(",")
         .map((item) => item.trim())
         .filter(Boolean);
 
-      filter.brand = {
-        $in: brands.map((item) => new RegExp(`^${escapeRegex(item)}$`, "i")),
-      };
+      if (brands.length > 0) {
+        filter.brand = {
+          $in: brands.map((item) => new RegExp(`^${escapeRegex(item)}$`, "i")),
+        };
+      }
     }
 
 

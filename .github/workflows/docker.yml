@@ -40,7 +40,7 @@ jobs:
         run: |
           docker build \
             -t ghcr.io/${{ github.repository_owner }}/g-lab-frontend:latest \
-            ./frontend
+            ./frontend-react
 
       - name: Push frontend image
         run: |
@@ -65,4 +65,3 @@ jobs:
             --name g-lab-frontend \
             -p 8080:80 \
             ghcr.io/${{ github.repository_owner }}/g-lab-frontend:latest
-

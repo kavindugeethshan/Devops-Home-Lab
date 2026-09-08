@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { sendEmail, generateOtpEmailHtml } from "../utils/sendEmail.js";
 import PasswordReset from "../models/PasswordResetModel.js";
+import crypto from "crypto";
 
 
 // Create user function
@@ -11,7 +12,7 @@ export const createUser = async (req, res) => {
   try {
     console.log("[REGISTER] 1 - createUser started");
 
-    const { email, firstname, lastname, password, Image } = req.body;
+    const { email, firstname, lastname, phone, password, Image } = req.body;
 
     // Validate email
     if (!email || typeof email !== "string") {
@@ -56,6 +57,20 @@ export const createUser = async (req, res) => {
       });
     }
 
+    // Validate phone number
+    if (!phone || typeof phone !== "string") {
+      return res.status(400).json({
+        message: "Mobile / Phone number is required",
+      });
+    }
+
+    const cleanPhone = phone.replace(/\D/g, "");
+    if (cleanPhone.length !== 10) {
+      return res.status(400).json({
+        message: "Mobile / Phone number must be exactly 10 digits (e.g. 0771234567)",
+      });
+    }
+
     // Validate password
     if (!password || typeof password !== "string") {
       return res.status(400).json({
@@ -97,8 +112,9 @@ export const createUser = async (req, res) => {
 
     console.log("[REGISTER] 5 - password hash completed");
 
-    // Generate OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // Generate cryptographically secure OTP
+    const otp = crypto.randomInt(100000, 1000000).toString();
+    const hashedOtp = await bcrypt.hash(otp, 10);
 
     const otpExpires = new Date(
       Date.now() + 10 * 60 * 1000
@@ -115,10 +131,13 @@ export const createUser = async (req, res) => {
       email: cleanEmail,
       firstname: firstname.trim(),
       lastname: lastname.trim(),
+      phone: cleanPhone,
       password: hashedPassword,
       Image,
-      emailverificationotp: otp,
+      emailverificationotp: hashedOtp,
       emailverificationotpexpires: otpExpires,
+      otpAttempts: 0,
+      lastOtpSentAt: new Date(),
     });
 
     console.log("[REGISTER] 7 - pending user created");
@@ -195,9 +214,8 @@ export const loginUser = async (req, res) => {
 
     // Check whether user exists
     if (!user) {
-      return res.status(404).json({
-        message: "This email is not registered. Please register.",
-        errorType: "USER_NOT_FOUND",
+      return res.status(401).json({
+        message: "Invalid email or password",
       });
     }
 
@@ -215,8 +233,7 @@ export const loginUser = async (req, res) => {
     // Check password
     if (!isPasswordValid) {
       return res.status(401).json({
-        message: "Incorrect password. Please try again.",
-        errorType: "WRONG_PASSWORD",
+        message: "Invalid email or password",
       });
     }
     //create jwt token
@@ -275,10 +292,10 @@ export async function getprofile(req, res) {
   }
 }
 //-------------------------------------------------------------------------
-//Update user profile function 
+//Update user profile function
 export const updateprofule = async (req, res) => {
   try {
-    const { firstname, lastname, email, image, Image } = req.body;
+    const { firstname, lastname, email, phone, image, Image } = req.body;
     const user = await User.findById(req.user.userId);
     if (!user) {
       return res.status(404).json({
@@ -320,6 +337,31 @@ export const updateprofule = async (req, res) => {
 
       user.lastname = cleanLastname;
     }
+
+    if (phone !== undefined) {
+      if (typeof phone !== "string") {
+        return res.status(400).json({
+          message: "Phone number must be a string",
+        });
+      }
+
+      const cleanPhone = phone.replace(/\D/g, "");
+
+      if (cleanPhone && cleanPhone.length !== 10) {
+        return res.status(400).json({
+          message: "Mobile / Phone number must be exactly 10 digits (e.g. 0771234567)",
+        });
+      }
+
+      user.phone = cleanPhone;
+
+      // Keep address.phone synced if empty
+      if (!user.address) user.address = {};
+      if (!user.address.phone || user.address.phone === "") {
+        user.address.phone = cleanPhone;
+      }
+    }
+
     if (email) {
       const cleanEmail = email.trim().toLowerCase();
 
@@ -404,7 +446,7 @@ export const updateprofule = async (req, res) => {
   }
 }
 //---------------------------------------------------------------------
-//change password 
+//change password
 export const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -455,7 +497,7 @@ export const changePassword = async (req, res) => {
 }
 
 //---------------------------------------------------------------------------
-//Delete  own account 
+//Delete  own account
 export const deleteOwnAccount = async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);
@@ -488,8 +530,7 @@ export const deleteOwnAccount = async (req, res) => {
 export const updateAddress = async (req, res) => {
   try {
     const addressData = req.body.address || req.body;
-    const { addressLine, city, district, postalCode } = addressData;
-
+    const { addressLine, city, district, province, postalCode, fullName, phone } = addressData;
 
     // Find logged-in user
     const user = await User.findById(req.user.userId);
@@ -512,9 +553,9 @@ export const updateAddress = async (req, res) => {
       });
     }
 
-    if (!district || typeof district !== "string") {
+    if (!district && !province) {
       return res.status(400).json({
-        message: "District is required",
+        message: "District or province is required",
       });
     }
 
@@ -523,13 +564,24 @@ export const updateAddress = async (req, res) => {
         message: "Postal code is required",
       });
     }
+
+    const cleanDistrict = (district || province || "").trim();
+    const cleanProvince = (province || district || "").trim();
+
     // Update address
     user.address = {
+      fullName: (fullName || user.address?.fullName || `${user.firstname} ${user.lastname}`).trim(),
+      phone: (phone || user.address?.phone || user.phone || "").trim(),
       addressLine: addressLine.trim(),
       city: city.trim(),
-      district: district.trim(),
+      district: cleanDistrict,
+      province: cleanProvince,
       postalCode: postalCode.trim(),
     };
+
+    if (phone && !user.phone) {
+      user.phone = phone.trim();
+    }
 
     // Save updated user
     await user.save();
@@ -537,6 +589,14 @@ export const updateAddress = async (req, res) => {
     res.status(200).json({
       message: "Address updated successfully",
       address: user.address,
+      user: {
+        _id: user._id,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        email: user.email,
+        phone: user.phone,
+        address: user.address
+      }
     });
   } catch (err) {
     res.status(500).json({
@@ -546,6 +606,7 @@ export const updateAddress = async (req, res) => {
 };
 
 //--------------------------------------------------------------------------------
+// Resend OTP for Pending User
 // Resend OTP for Pending User
 export const resendOTP = async (req, res) => {
   try {
@@ -574,11 +635,23 @@ export const resendOTP = async (req, res) => {
       });
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // Cooldown: enforce 60 seconds minimum between OTP resends
+    if (pendingUser.lastOtpSentAt && (Date.now() - new Date(pendingUser.lastOtpSentAt).getTime() < 60000)) {
+      const waitSeconds = Math.ceil((60000 - (Date.now() - new Date(pendingUser.lastOtpSentAt).getTime())) / 1000);
+      return res.status(429).json({
+        message: `Please wait ${waitSeconds} seconds before requesting a new verification code.`,
+      });
+    }
+
+    // Generate cryptographically secure OTP and hash it before storing
+    const otp = crypto.randomInt(100000, 1000000).toString();
+    const hashedOtp = await bcrypt.hash(otp, 10);
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
-    pendingUser.emailverificationotp = otp;
+    pendingUser.emailverificationotp = hashedOtp;
     pendingUser.emailverificationotpexpires = otpExpires;
+    pendingUser.otpAttempts = 0; // Reset failed attempts on fresh OTP
+    pendingUser.lastOtpSentAt = new Date();
     await pendingUser.save();
 
     sendEmail({
@@ -634,15 +707,45 @@ export const verifyEmail = async (req, res) => {
       });
     }
 
+    // Check expiration
     if (new Date() > pendingUser.emailverificationotpexpires) {
       return res.status(400).json({
-        message: "OTP has expired",
+        message: "OTP has expired. Please request a new code.",
       });
     }
 
-    if (pendingUser.emailverificationotp !== otp.toString().trim()) {
+    // Check attempt lockout (max 5 failed attempts)
+    if ((pendingUser.otpAttempts || 0) >= 5) {
+      await PendingUser.deleteOne({ _id: pendingUser._id });
+      return res.status(429).json({
+        message: "Too many failed attempts. For security, your registration has been cancelled. Please register again.",
+      });
+    }
+
+    // Compare OTP securely using bcrypt or timing comparison
+    const cleanOtp = otp.toString().trim();
+    let isOtpValid = false;
+
+    if (pendingUser.emailverificationotp.startsWith("$2")) {
+      isOtpValid = await bcrypt.compare(cleanOtp, pendingUser.emailverificationotp);
+    } else {
+      isOtpValid = pendingUser.emailverificationotp === cleanOtp;
+    }
+
+    if (!isOtpValid) {
+      pendingUser.otpAttempts = (pendingUser.otpAttempts || 0) + 1;
+      await pendingUser.save();
+
+      const remainingAttempts = 5 - pendingUser.otpAttempts;
+      if (remainingAttempts <= 0) {
+        await PendingUser.deleteOne({ _id: pendingUser._id });
+        return res.status(429).json({
+          message: "Too many failed attempts. For security, your registration session has been cancelled. Please register again.",
+        });
+      }
+
       return res.status(400).json({
-        message: "Invalid OTP",
+        message: `Invalid OTP. You have ${remainingAttempts} attempt(s) remaining.`,
       });
     }
 
@@ -651,6 +754,11 @@ export const verifyEmail = async (req, res) => {
       email: pendingUser.email,
       firstname: pendingUser.firstname,
       lastname: pendingUser.lastname,
+      phone: pendingUser.phone || "",
+      address: {
+        phone: pendingUser.phone || "",
+        fullName: `${pendingUser.firstname} ${pendingUser.lastname}`.trim()
+      },
       password: pendingUser.password, // Already hashed
       Image: pendingUser.Image,
       isemailverified: true,
@@ -673,6 +781,7 @@ export const verifyEmail = async (req, res) => {
   }
 };
 
+
 //--------------------------------------------------------------------------------
 // FORGOT PASSWORD - Step 1: Send Reset OTP
 export const forgotPassword = async (req, res) => {
@@ -686,16 +795,37 @@ export const forgotPassword = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email: cleanEmail });
-
-    if (!user) {
-      return res.status(404).json({
-        message: "This email is not registered. Please register.",
-        errorType: "USER_NOT_FOUND",
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      return res.status(400).json({
+        message: "Please enter a valid email address",
       });
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // Generic response to prevent account enumeration
+    const genericResponse = {
+      message: "If an account with that email exists, a password reset code has been sent.",
+    };
+
+    const user = await User.findOne({ email: cleanEmail });
+
+    // If user does not exist, return generic 200 without sending email or creating record
+    if (!user) {
+      return res.status(200).json(genericResponse);
+    }
+
+    // Enforce 60-second cooldown between reset requests
+    const existingReset = await PasswordReset.findOne({ email: cleanEmail });
+    if (existingReset && existingReset.lastSentAt && (Date.now() - new Date(existingReset.lastSentAt).getTime() < 60000)) {
+      const waitSeconds = Math.ceil((60000 - (Date.now() - new Date(existingReset.lastSentAt).getTime())) / 1000);
+      return res.status(429).json({
+        message: `Please wait ${waitSeconds} seconds before requesting another password reset code.`,
+      });
+    }
+
+    // Generate cryptographically secure OTP and hash it
+    const otp = crypto.randomInt(100000, 1000000).toString();
+    const hashedOtp = await bcrypt.hash(otp, 10);
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     await PasswordReset.findOneAndDelete({
@@ -704,12 +834,14 @@ export const forgotPassword = async (req, res) => {
 
     await PasswordReset.create({
       email: cleanEmail,
-      otp,
+      otp: hashedOtp,
       expiresAt,
       verified: false,
+      attempts: 0,
+      lastSentAt: new Date(),
     });
 
-    // Send email asynchronously in background to ensure fast response
+    // Send email asynchronously in background
     sendEmail({
       to: cleanEmail,
       subject: "G-Lab Password Reset Code",
@@ -719,17 +851,15 @@ export const forgotPassword = async (req, res) => {
         otp,
         "We received a request to reset your G-Lab account password. Use the verification code below to continue:"
       ),
-    }).catch(err => console.error("Forgot password email send error:", err));
+    }).catch((err) => console.error("Forgot password email send error:", err.message));
 
-    return res.status(200).json({
-      message: "Password reset code sent to your email.",
-    });
+    return res.status(200).json(genericResponse);
 
   } catch (error) {
     console.error("Forgot password error:", error);
 
     return res.status(500).json({
-      message: "Failed to send password reset code.",
+      message: "Failed to process password reset request.",
     });
   }
 };
@@ -761,13 +891,42 @@ export const verifyResetOtp = async (req, res) => {
       });
     }
 
-    if (resetRecord.otp !== otp.toString().trim()) {
+    // Attempt limit check (max 5 attempts)
+    if ((resetRecord.attempts || 0) >= 5) {
+      await PasswordReset.deleteOne({ _id: resetRecord._id });
+      return res.status(429).json({
+        message: "Too many failed attempts. For security, this reset code has been invalidated. Please request a new code.",
+      });
+    }
+
+    const cleanOtp = otp.toString().trim();
+    let isOtpValid = false;
+
+    if (resetRecord.otp.startsWith("$2")) {
+      isOtpValid = await bcrypt.compare(cleanOtp, resetRecord.otp);
+    } else {
+      isOtpValid = resetRecord.otp === cleanOtp;
+    }
+
+    if (!isOtpValid) {
+      resetRecord.attempts = (resetRecord.attempts || 0) + 1;
+      await resetRecord.save();
+
+      const remainingAttempts = 5 - resetRecord.attempts;
+      if (remainingAttempts <= 0) {
+        await PasswordReset.deleteOne({ _id: resetRecord._id });
+        return res.status(429).json({
+          message: "Too many failed attempts. For security, this reset code has been invalidated. Please request a new code.",
+        });
+      }
+
       return res.status(400).json({
-        message: "Invalid OTP code",
+        message: `Invalid OTP code. You have ${remainingAttempts} attempt(s) remaining.`,
       });
     }
 
     resetRecord.verified = true;
+    resetRecord.attempts = 0; // Reset attempts upon successful verification
     await resetRecord.save();
 
     return res.status(200).json({
@@ -805,7 +964,7 @@ export const resetPassword = async (req, res) => {
 
     if (!resetRecord) {
       return res.status(404).json({
-        message: "Reset request not found. Please request a new code.",
+        message: "Reset request not found or expired. Please request a new code.",
       });
     }
 
@@ -815,9 +974,19 @@ export const resetPassword = async (req, res) => {
       });
     }
 
-    if (!resetRecord.verified || resetRecord.otp !== otp.toString().trim()) {
+    // Verify OTP matching
+    const cleanOtp = otp.toString().trim();
+    let isOtpValid = false;
+
+    if (resetRecord.otp.startsWith("$2")) {
+      isOtpValid = await bcrypt.compare(cleanOtp, resetRecord.otp);
+    } else {
+      isOtpValid = resetRecord.otp === cleanOtp;
+    }
+
+    if (!resetRecord.verified || !isOtpValid) {
       return res.status(400).json({
-        message: "Please verify your OTP before resetting password.",
+        message: "Please verify your OTP code before resetting password.",
       });
     }
 
@@ -833,7 +1002,7 @@ export const resetPassword = async (req, res) => {
     user.password = hashedPassword;
     await user.save();
 
-    // Delete the reset record so it cannot be reused
+    // Delete the reset record so it cannot be reused (one-time reset token)
     await PasswordReset.deleteOne({ _id: resetRecord._id });
 
     return res.status(200).json({
