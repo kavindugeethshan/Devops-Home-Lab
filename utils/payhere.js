@@ -62,18 +62,12 @@ export const verifyPayHereNotifyHash = (
 
     const receivedMd5 = (md5sig || "").toString().trim().toUpperCase();
 
-    console.log("=== PayHere Notification Signature Diagnostics ===");
-    console.log("Incoming merchant_id:", merchantId);
-    console.log("Incoming order_id:", orderId);
-    console.log("Incoming payhere_amount (raw):", payhereAmount);
-    console.log("Formatted payhere_amount (2 decimals):", formattedAmount);
-    console.log("Incoming payhere_currency:", payhereCurrency);
-    console.log("Incoming status_code:", statusCode);
-    console.log("Incoming md5sig:", receivedMd5);
-    console.log("Locally Calculated localMd5sig:", localMd5sig);
-    console.log("Signature Match Result:", localMd5sig === receivedMd5);
-    console.log("==================================================");
+    const localBuffer = Buffer.from(localMd5sig, "utf-8");
+    const receivedBuffer = Buffer.from(receivedMd5, "utf-8");
 
-    return localMd5sig === receivedMd5;
+    if (localBuffer.length !== receivedBuffer.length) {
+        return false;
+    }
+
+    return crypto.timingSafeEqual(localBuffer, receivedBuffer);
 };
-

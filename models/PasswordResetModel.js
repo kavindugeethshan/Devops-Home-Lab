@@ -23,6 +23,16 @@ const passwordResetSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+
+        attempts: {
+            type: Number,
+            default: 0,
+        },
+
+        lastSentAt: {
+            type: Date,
+            default: Date.now,
+        },
     },
     { timestamps: true }
 );

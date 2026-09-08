@@ -75,6 +75,16 @@ const orderSchema = new mongoose.Schema(
         },
 
         Diliveryaddress: {
+            fullName: {
+                type: String,
+                default: "",
+            },
+
+            phone: {
+                type: String,
+                default: "",
+            },
+
             addressLine: {
                 type: String,
                 required: true,
@@ -87,7 +97,12 @@ const orderSchema = new mongoose.Schema(
 
             district: {
                 type: String,
-                required: true,
+                default: "",
+            },
+
+            province: {
+                type: String,
+                default: "",
             },
 
             postalCode: {

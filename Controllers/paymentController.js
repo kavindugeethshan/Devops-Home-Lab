@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Order from "../models/Ordermodel.js";
 import Payment from "../models/Paymentmodel.js";
+import Product from "../models/Productmodel.js";
 import { generatePayHereHash, verifyPayHereNotifyHash } from "../utils/payhere.js";
 
 
@@ -165,14 +166,19 @@ export const getPaymentDetails = async (req, res) => {
                 hash: hash,
                 notifyUrl: process.env.PAYHERE_NOTIFY_URL || `${req.protocol}://${req.get("host")}/payments/notify`,
                 customer: {
-                    first_name: payment.User.firstname || "Customer",
-                    last_name: payment.User.lastname || "User",
+                    first_name: order.Diliveryaddress?.fullName ? order.Diliveryaddress.fullName.split(" ")[0] : (payment.User.firstname || "Customer"),
+                    last_name: order.Diliveryaddress?.fullName ? (order.Diliveryaddress.fullName.split(" ").slice(1).join(" ") || payment.User.lastname || "User") : (payment.User.lastname || "User"),
+                    full_name: order.Diliveryaddress?.fullName || `${payment.User.firstname || ""} ${payment.User.lastname || ""}`.trim() || "Customer User",
                     email: payment.User.email || "customer@example.com",
-                    phone: "0771234567",
+                    phone: order.Diliveryaddress?.phone || payment.User.phone || "0771234567",
                     address: order.Diliveryaddress?.addressLine || "Main Street",
                     city: order.Diliveryaddress?.city || "Colombo",
+                    district: order.Diliveryaddress?.district || "",
+                    province: order.Diliveryaddress?.province || order.Diliveryaddress?.district || "",
+                    postalCode: order.Diliveryaddress?.postalCode || "",
                     country: "Sri Lanka",
-                }
+                },
+                deliveryAddress: order.Diliveryaddress || null
             }
         });
     } catch (error) {
@@ -195,7 +201,14 @@ export const handlePayHereNotify = async (req, res) => {
 
         console.log(`[PayHere Webhook Received] payment_id: ${payment_id}, order_id: ${order_id}, status_code: ${status_code}`);
 
-        // 1. Verify PayHere notification MD5 signature
+        // 1. Validate Expected Merchant ID from server environment
+        const expectedMerchantId = (process.env.PAYHERE_MERCHANT_ID || "").trim();
+        if (!merchant_id || merchant_id.toString().trim() !== expectedMerchantId) {
+            console.error(`[PayHere Security Alert] Invalid merchant_id: received '${merchant_id}', expected '${expectedMerchantId}'`);
+            return res.status(400).send("Invalid merchant ID");
+        }
+
+        // 2. Verify PayHere notification MD5 signature using timing-safe comparison
         const isValidSignature = verifyPayHereNotifyHash(
             merchant_id,
             order_id,
@@ -207,26 +220,69 @@ export const handlePayHereNotify = async (req, res) => {
         );
 
         if (!isValidSignature) {
-            console.error("PayHere notification signature mismatch");
+            console.error("[PayHere Security Alert] PayHere notification signature mismatch");
             return res.status(400).send("Invalid signature");
         }
 
-        // 2. Find associated Order and Payment records
+        // 3. Validate Order ID format and query database
         if (!order_id || !mongoose.Types.ObjectId.isValid(order_id)) {
+            console.error("[PayHere Security Alert] Invalid order ID format:", order_id);
             return res.status(400).send("Invalid order ID format");
         }
 
         const order = await Order.findById(order_id);
         if (!order) {
+            console.error("[PayHere Security Alert] Order not found:", order_id);
             return res.status(404).send("Order not found");
         }
 
         const payment = await Payment.findOne({ Order: order._id });
         if (!payment) {
+            console.error("[PayHere Security Alert] Payment record not found for order:", order._id);
             return res.status(404).send("Payment not found");
         }
 
-        // 3. Update status based on PayHere status_code (2 = Success, 0 = Pending, -1 = Canceled, -2 = Failed)
+        // 4. Verify payment/order relationship
+        if (payment.Order.toString() !== order._id.toString()) {
+            console.error("[PayHere Security Alert] Payment-Order relationship mismatch");
+            return res.status(400).send("Payment-Order mismatch");
+        }
+
+        // 5. Verify Currency against authoritative server payment record
+        const expectedCurrency = (payment.currency || "LKR").toUpperCase();
+        if (!payhere_currency || payhere_currency.toString().trim().toUpperCase() !== expectedCurrency) {
+            console.error(`[PayHere Security Alert] Currency mismatch: received '${payhere_currency}', expected '${expectedCurrency}'`);
+            return res.status(400).send("Currency mismatch");
+        }
+
+        // 6. Verify Payment Amount against authoritative server-side record (Prevent Amount Tampering)
+        const receivedAmount = Number(payhere_amount).toFixed(2);
+        const expectedPaymentAmount = Number(payment.amount).toFixed(2);
+        const expectedOrderTotal = Number(order.FinalTotal).toFixed(2);
+
+        if (receivedAmount !== expectedPaymentAmount || receivedAmount !== expectedOrderTotal) {
+            console.error(`[PayHere Security Alert] Amount tampering detected! Received: ${receivedAmount}, Expected Payment: ${expectedPaymentAmount}, Expected Order: ${expectedOrderTotal}`);
+            return res.status(400).send("Payment amount mismatch");
+        }
+
+        // 7. Handle Idempotency / Duplicate Notifications
+        if (payment.status === "Paid" && order.paymentStatus === "Paid") {
+            console.log(`[PayHere Webhook] Duplicate notification received for already paid order ${order._id}. Idempotently returning OK.`);
+            return res.status(200).send("OK");
+        }
+
+        // 8. Prevent resurrecting cancelled orders without authorization
+        if (order.Orderstatus === "Cancelled") {
+            console.warn(`[PayHere Webhook] Payment received for already Cancelled order ${order._id}. Marking payment as RefundPending.`);
+            payment.status = "RefundPending";
+            if (payment_id) {
+                payment.transactionId = payment_id;
+            }
+            await payment.save();
+            return res.status(200).send("OK");
+        }
+
+        // 9. Update status based on PayHere status_code (2 = Success, 0 = Pending, -1 = Canceled, -2 = Failed, -3 = Chargedback)
         if (status_code === "2") {
             payment.status = "Paid";
             payment.paidAt = new Date();
@@ -235,13 +291,46 @@ export const handlePayHereNotify = async (req, res) => {
             }
             await payment.save();
 
+            const wasAlreadyConfirmed = order.Orderstatus === "Confirmed";
             order.paymentStatus = "Paid";
             order.Orderstatus = "Confirmed";
+
+            if (!order.statusHistory) {
+                order.statusHistory = [];
+            }
             order.statusHistory.push({
                 status: "Confirmed",
                 changedAt: new Date(),
             });
             await order.save();
+
+            // Deduct stock if order is transitioning to Confirmed
+            if (!wasAlreadyConfirmed && Array.isArray(order.Products)) {
+                for (const item of order.Products) {
+                    if (item.productId) {
+                        try {
+                            const product = await Product.findById(item.productId);
+                            if (product) {
+                                product.stock = Math.max(0, product.stock - (item.quantity || 1));
+                                product.isavailable = product.stock > 0;
+                                await product.save();
+                            }
+                        } catch (stockErr) {
+                            console.error(`Failed to decrement stock for product ${item.productId}:`, stockErr.message);
+                        }
+                    }
+                }
+            }
+
+            // Real-time update for admin & client
+            const io = req.app.get("io");
+            if (io) {
+                io.emit("orderUpdated", {
+                    orderId: order._id,
+                    status: "Confirmed",
+                    paymentStatus: "Paid",
+                });
+            }
         } else if (status_code === "-1" || status_code === "-2" || status_code === "-3") {
             payment.status = "Failed";
             await payment.save();
@@ -256,5 +345,3 @@ export const handlePayHereNotify = async (req, res) => {
         return res.status(500).send("Internal server error");
     }
 };
-
-
