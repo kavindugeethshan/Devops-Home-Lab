@@ -1,4 +1,4 @@
-import Product from "../models/productModel.js";
+import Product from "../models/Productmodel.js";
 
 const escapeRegex = (text) => {
     return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
